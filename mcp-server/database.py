@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 class Database:
     """PostgreSQL database connection manager using asyncpg"""
     
-    def __init__(self, host: str = "192.168.0.50", port: int = 5432, 
+    def __init__(self, host: str = "localhost", port: int = 5432, 
                  database: str = "postgres", user: str = "postgres", 
                  password: Optional[str] = None):
         self.host = host
@@ -18,7 +18,7 @@ class Database:
         self.pool: Optional[asyncpg.Pool] = None
     
     @classmethod
-    async def connect(cls, host: str = "192.168.0.50", port: int = 5432,
+    async def connect(cls, host: str = "localhost", port: int = 5432,
                      database: str = "postgres", user: str = "postgres",
                      password: Optional[str] = None) -> "Database":
         """Create a new database instance and establish connection pool"""
@@ -56,8 +56,7 @@ class DatabaseManager:
     
     def __init__(self):
         self.databases: Dict[str, Database] = {}
-    
-    async def add_database(self, name: str, host: str = "192.168.0.50", 
+      async def add_database(self, name: str, host: str = "localhost", 
                           port: int = 5432, database: str = "postgres",
                           user: str = "postgres", password: Optional[str] = None) -> None:
         """Add a new database connection"""

@@ -27,8 +27,8 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     db_manager = DatabaseManager()
     
     # Get database credentials from environment
-    host = "192.168.0.50"
-    port = 5432
+    host = os.getenv("POSTGRES_HOST", "192.168.0.50")
+    port = int(os.getenv("POSTGRES_PORT", "5432"))
     user = os.getenv("POSTGRES_USER", "postgres")
     password = os.getenv("POSTGRES_PASSWORD")
     
@@ -127,3 +127,23 @@ async def execute_sql(sql: str, database: str = "postgres") -> str:
         return f"SQL executed successfully on '{database}': {result}"
     except Exception as e:
         return f"SQL execution failed on '{database}': {str(e)}"
+
+@mcp.tool()
+async def get_connection_info() -> str:
+    """Get information about the current database connections"""
+    ctx = mcp.get_context()
+    db_manager = ctx.request_context.lifespan_context.db_manager
+    
+    if not db_manager.databases:
+        return "No database connections active"
+    
+    info_lines = ["Database Connection Information:"]
+    
+    # Get connection details from the first database (they all use same host/port)
+    first_db = next(iter(db_manager.databases.values()))
+    info_lines.append(f"Host: {first_db.host}")
+    info_lines.append(f"Port: {first_db.port}")
+    info_lines.append(f"User: {first_db.user}")
+    info_lines.append(f"Connected Databases: {', '.join(db_manager.list_databases())}")
+    
+    return "\n".join(info_lines)
