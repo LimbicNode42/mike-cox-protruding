@@ -6,6 +6,9 @@ from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 import logging
+import argparse
+import asyncio
+import os
 
 from postgres_db import DatabaseManager
 from redis_db import RedisManager
@@ -15,8 +18,22 @@ from config import AppConfig
 from tools import register_database_tools, register_database_resources
 from mcp.server.fastmcp import FastMCP
 
-# Configure logging to stderr so it doesn't interfere with MCP JSON protocol on stdout
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Configure logging based on mode (stderr for stdio, normal for HTTP)
+def configure_logging(mode: str = "stdio"):
+    if mode == "stdio":
+        # For MCP Inspector - log to stderr so it doesn't interfere with JSON protocol on stdout
+        logging.basicConfig(
+            level=logging.INFO, 
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[logging.StreamHandler()]
+        )
+    else:
+        # For HTTP mode - normal logging
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+
 logger = logging.getLogger(__name__)
 
 
@@ -172,11 +189,71 @@ def create_server() -> FastMCP:
     return mcp
 
 
-# Create the server instance
-mcp = create_server()
+def parse_arguments():
+    """Parse command line arguments"""
+    parser = argparse.ArgumentParser(description="Database MCP Server")
+    parser.add_argument(
+        "--mode", 
+        choices=["stdio", "http"], 
+        default="stdio",
+        help="Server mode: stdio for MCP Inspector, http for production"
+    )
+    parser.add_argument(
+        "--host", 
+        default="0.0.0.0", 
+        help="Host to bind to (HTTP mode only)"
+    )
+    parser.add_argument(
+        "--port", 
+        type=int, 
+        default=8000, 
+        help="Port to bind to (HTTP mode only)"
+    )
+    return parser.parse_args()
 
+
+async def run_http_server(host: str = "0.0.0.0", port: int = 8000):
+    """Run the server in HTTP mode using uvicorn"""
+    import uvicorn
+    
+    # Create the MCP server
+    mcp = create_server()
+    
+    # Get the FastAPI/Starlette app from FastMCP
+    app = mcp.create_app()
+    
+    # Configure uvicorn
+    config = uvicorn.Config(
+        app,
+        host=host,
+        port=port,
+        log_level="info",
+    )
+    
+    # Run the server
+    server = uvicorn.Server(config)
+    logger.info(f"Starting Database MCP Server in HTTP mode on {host}:{port}")
+    await server.serve()
+
+def run_stdio_server():
+    """Run the server in STDIO mode for MCP Inspector"""
+    # Create the MCP server
+    mcp = create_server()
+    
+    logger.info("Starting Database MCP Server in STDIO mode for MCP Inspector")
+    # FastMCP handles its own event loop for stdio
+    mcp.run()
 
 if __name__ == "__main__":
     """Run the server when executed directly"""
-    # FastMCP handles its own event loop
-    mcp.run()
+    args = parse_arguments()
+    
+    # Configure logging based on mode
+    configure_logging(args.mode)
+    
+    if args.mode == "http":
+        # Run HTTP server with uvicorn
+        asyncio.run(run_http_server(args.host, args.port))
+    else:
+        # Run STDIO server for MCP Inspector (default)
+        run_stdio_server()

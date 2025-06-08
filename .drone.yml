@@ -1,0 +1,76 @@
+kind: pipeline
+type: docker
+name: mcp-server
+
+steps:
+  # Lint the code
+  - name: lint
+    image: python:3.11-slim
+    commands:
+      - cd mcp-server
+      - pip install uv
+      - uv sync --frozen
+      - uv run ruff check .
+      - uv run ruff format --check .
+
+  # Security scan
+  - name: security-scan
+    image: python:3.11-slim
+    commands:
+      - cd mcp-server
+      - pip install uv
+      - uv sync --frozen
+      - uv run bandit -r . -f json -o bandit-report.json || true
+      - uv run safety check
+
+  # Build Docker image
+  - name: build
+    image: plugins/docker
+    settings:
+      registry: repo.wheeler-network.com
+      repo: repo.wheeler-network.com/mcp-server
+      dockerfile: mcp-server/Dockerfile
+      context: mcp-server
+      tags:
+        - latest
+        - ${DRONE_COMMIT_SHA:0:8}
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      branch:
+        - main
+        - master
+
+  # Publish to registry
+  - name: publish
+    image: plugins/docker
+    settings:
+      registry: repo.wheeler-network.com
+      repo: repo.wheeler-network.com/mcp-server
+      dockerfile: mcp-server/Dockerfile
+      context: mcp-server
+      tags:
+        - latest
+        - ${DRONE_COMMIT_SHA:0:8}
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      dry_run: false
+    when:
+      branch:
+        - main
+        - master
+      event:
+        - push
+
+trigger:
+  branch:
+    - main
+    - master
+    - develop
+  event:
+    - push
+    - pull_request
