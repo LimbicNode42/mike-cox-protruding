@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd mcp-server
-          uv sync --frozen
+          uv sync --extra dev --frozen
 
       - name: Run linting
         run: |
@@ -52,7 +52,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd mcp-server
-          uv sync --frozen
+          uv sync --extra dev --frozen
 
       - name: Run security scan
         run: |
