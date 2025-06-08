@@ -1,12 +1,9 @@
 kind: pipeline
-type: docker
-name: mcp-server
+name: build
 
-trigger:
-  branch:
-    - master
-  event:
-    - push
+platform:
+  os: linux
+  arch: arm64
 
 steps:
   # Lint the code
@@ -49,15 +46,11 @@ steps:
   - name: publish
     image: plugins/docker
     settings:
-      registry: repo.wheeler-network.com
       repo: repo.wheeler-network.com/mcp-server
-      dockerfile: mcp-server/Dockerfile
-      context: mcp-server
-      tags:
-        - latest
-        - ${DRONE_COMMIT_SHA:0:8}
+      registry: repo.wheeler-network.com
       username:
         from_secret: REPO_USER
       password:
         from_secret: REPO_PASS
-      dry_run: false
+      dockerfile: mcp-server/Dockerfile
+      auto_tag: true
