@@ -2,8 +2,9 @@
 Redis tools for the MCP server
 """
 
-from mcp.server.fastmcp import FastMCP
 import json
+
+from mcp.server.fastmcp import FastMCP
 
 
 def register_redis_tools(mcp: FastMCP):

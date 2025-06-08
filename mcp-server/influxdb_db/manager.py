@@ -2,11 +2,11 @@
 InfluxDB database manager and operations
 """
 
-from influxdb_client import InfluxDBClient, Point
-from influxdb_client.client.query_api import QueryApi
-from typing import Optional, List, Dict, Any
-import logging
 import asyncio
+import logging
+from typing import Any, Dict, List, Optional
+
+from influxdb_client import InfluxDBClient
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,7 @@ class InfluxDBManager:
                         measurements.append(record.get_value())
 
             return list(set(measurements))  # Remove duplicates
-        except Exception as e:
+        except Exception:
             # Fallback method if schema.measurements doesn't work
             try:
                 fallback_query = f"""

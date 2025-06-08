@@ -2,8 +2,9 @@
 InfluxDB resources for the MCP server
 """
 
-from mcp.server.fastmcp import FastMCP
 import json
+
+from mcp.server.fastmcp import FastMCP
 
 
 def register_influxdb_resources(mcp: FastMCP):

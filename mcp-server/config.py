@@ -2,11 +2,12 @@
 Configuration management for the MCP server
 """
 
+import logging
 import os
 from dataclasses import dataclass
 from typing import Optional
+
 from dotenv import load_dotenv
-import logging
 
 # Load environment variables from .env file
 load_dotenv()

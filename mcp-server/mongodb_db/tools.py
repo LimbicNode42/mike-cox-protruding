@@ -3,7 +3,6 @@ MongoDB tools for the MCP server
 """
 
 from mcp.server.fastmcp import FastMCP
-import json
 
 
 def register_mongodb_tools(mcp: FastMCP):

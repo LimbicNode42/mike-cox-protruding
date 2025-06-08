@@ -2,8 +2,9 @@
 PostgreSQL resources for the MCP server
 """
 
-from mcp.server.fastmcp import FastMCP
 import json
+
+from mcp.server.fastmcp import FastMCP
 
 
 def register_postgres_resources(mcp: FastMCP):

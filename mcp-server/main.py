@@ -3,21 +3,21 @@ MCP Server main entry point
 Handles server initialization, lifespan management, and tool registration
 """
 
-from contextlib import asynccontextmanager
-from collections.abc import AsyncIterator
-from dataclasses import dataclass
-import logging
 import argparse
 import asyncio
-import os
+import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
 
+from mcp.server.fastmcp import FastMCP
+
+from config import AppConfig
+from influxdb_db import InfluxDBManager
+from mongodb_db import MongoDBManager
 from postgres_db import DatabaseManager
 from redis_db import RedisManager
-from mongodb_db import MongoDBManager
-from influxdb_db import InfluxDBManager
-from config import AppConfig
-from tools import register_database_tools, register_database_resources
-from mcp.server.fastmcp import FastMCP
+from tools import register_database_resources, register_database_tools
 
 
 # Configure logging based on mode (stderr for stdio, normal for HTTP)

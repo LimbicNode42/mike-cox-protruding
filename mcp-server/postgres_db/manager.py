@@ -1,6 +1,7 @@
-import asyncpg
-from typing import Optional, Any, List, Dict
 import logging
+from typing import Any, Dict, List, Optional
+
+import asyncpg
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +163,7 @@ class DatabaseManager:
         """Get information about a table's columns in a specific database"""
         sql = """
         SELECT column_name, data_type, is_nullable, column_default
-        FROM information_schema.columns 
+        FROM information_schema.columns
         WHERE table_name = $1
         ORDER BY ordinal_position;
         """
@@ -171,8 +172,8 @@ class DatabaseManager:
     async def list_tables(self, database_name: str) -> List[str]:
         """List all tables in a specific database"""
         sql = """
-        SELECT table_name 
-        FROM information_schema.tables 
+        SELECT table_name
+        FROM information_schema.tables
         WHERE table_schema = 'public'
         ORDER BY table_name;
         """
@@ -187,8 +188,8 @@ class DatabaseManager:
 
         db = next(iter(self.databases.values()))
         sql = """
-        SELECT datname 
-        FROM pg_database 
+        SELECT datname
+        FROM pg_database
         WHERE datistemplate = false
         ORDER BY datname;
         """

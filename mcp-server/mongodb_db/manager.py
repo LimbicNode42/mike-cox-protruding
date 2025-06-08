@@ -2,9 +2,10 @@
 MongoDB database manager and operations
 """
 
-from motor.motor_asyncio import AsyncIOMotorClient
-from typing import Optional, List, Dict, Any
 import logging
+from typing import Any, Dict, List, Optional
+
+from motor.motor_asyncio import AsyncIOMotorClient
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class MongoDBManager:
         """Connect to MongoDB"""
         try:
             # Build connection string - don't append database name to URI
-            connection_string = f"mongodb://"
+            connection_string = "mongodb://"
             if self.user and self.password:
                 connection_string += f"{self.user}:{self.password}@"
             connection_string += f"{self.host}:{self.port}/"

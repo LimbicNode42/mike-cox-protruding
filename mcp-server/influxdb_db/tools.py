@@ -2,8 +2,9 @@
 InfluxDB tools for the MCP server
 """
 
-from mcp.server.fastmcp import FastMCP
 import json
+
+from mcp.server.fastmcp import FastMCP
 
 
 def register_influxdb_tools(mcp: FastMCP):
@@ -47,7 +48,6 @@ def register_influxdb_tools(mcp: FastMCP):
         try:
             # Parse tags and fields from JSON
             import json
-            from datetime import datetime
 
             tag_dict = json.loads(tags) if tags else {}
             field_dict = json.loads(fields)
@@ -96,13 +96,13 @@ def register_influxdb_tools(mcp: FastMCP):
 
             # Create bucket with retention policy
             org = influxdb_manager.org
-            bucket = buckets_api.create_bucket(
+            buckets_api.create_bucket(
                 bucket_name=bucket_name,
                 org=org,
                 retention_rules=[
                     {
                         "type": "expire",
-                        "everySeconds": self._parse_retention_period(retention_period),
+                        # "everySeconds": self._parse_retention_period(retention_period),
                     }
                 ],
             )

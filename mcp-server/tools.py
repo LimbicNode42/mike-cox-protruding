@@ -4,11 +4,12 @@ Imports and registers tools and resources from enabled database modules
 """
 
 from mcp.server.fastmcp import FastMCP
-from postgres_db import register_postgres_tools, register_postgres_resources
-from redis_db import register_redis_tools, register_redis_resources
-from mongodb_db import register_mongodb_tools, register_mongodb_resources
-from influxdb_db import register_influxdb_tools, register_influxdb_resources
+
 from config import AppConfig
+from influxdb_db import register_influxdb_resources, register_influxdb_tools
+from mongodb_db import register_mongodb_resources, register_mongodb_tools
+from postgres_db import register_postgres_resources, register_postgres_tools
+from redis_db import register_redis_resources, register_redis_tools
 
 
 def register_database_tools(mcp: FastMCP, config: AppConfig):

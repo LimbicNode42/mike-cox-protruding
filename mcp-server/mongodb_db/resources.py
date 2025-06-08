@@ -2,8 +2,9 @@
 MongoDB resources for the MCP server
 """
 
-from mcp.server.fastmcp import FastMCP
 import json
+
+from mcp.server.fastmcp import FastMCP
 
 
 def register_mongodb_resources(mcp: FastMCP):

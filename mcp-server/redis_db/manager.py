@@ -2,10 +2,10 @@
 Redis database manager and operations
 """
 
-import redis.asyncio as redis
-from typing import Optional, List, Dict, Any
-import json
 import logging
+from typing import Any, Dict, List, Optional
+
+import redis.asyncio as redis
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class RedisManager:
             raise ConnectionError("Not connected to Redis")
         info = await self.client.info("keyspace")
         databases = []
-        for key, value in info.items():
+        for key, _value in info.items():
             if key.startswith("db"):
                 db_num = int(key[2:])  # Extract number from "db0", "db1", etc.
                 databases.append(db_num)
