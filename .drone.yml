@@ -2,6 +2,12 @@ kind: pipeline
 type: docker
 name: mcp-server
 
+trigger:
+  branch:
+    - master
+  event:
+    - push
+
 steps:
   # Lint the code
   - name: lint
@@ -35,13 +41,9 @@ steps:
         - latest
         - ${DRONE_COMMIT_SHA:0:8}
       username:
-        from_secret: docker_username
+        from_secret: REPO_USER
       password:
-        from_secret: docker_password
-    when:
-      branch:
-        - main
-        - master
+        from_secret: REPO_PASS
 
   # Publish to registry
   - name: publish
@@ -55,22 +57,7 @@ steps:
         - latest
         - ${DRONE_COMMIT_SHA:0:8}
       username:
-        from_secret: docker_username
+        from_secret: REPO_USER
       password:
-        from_secret: docker_password
+        from_secret: REPO_PASS
       dry_run: false
-    when:
-      branch:
-        - main
-        - master
-      event:
-        - push
-
-trigger:
-  branch:
-    - main
-    - master
-    - develop
-  event:
-    - push
-    - pull_request

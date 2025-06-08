@@ -219,8 +219,8 @@ async def run_http_server(host: str = "0.0.0.0", port: int = 8000):
     # Create the MCP server
     mcp = create_server()
     
-    # Get the FastAPI/Starlette app from FastMCP
-    app = mcp.create_app()
+    # Get the Starlette app from FastMCP for streamable HTTP transport
+    app = mcp.streamable_http_app()
     
     # Configure uvicorn
     config = uvicorn.Config(
@@ -235,15 +235,6 @@ async def run_http_server(host: str = "0.0.0.0", port: int = 8000):
     logger.info(f"Starting Database MCP Server in HTTP mode on {host}:{port}")
     await server.serve()
 
-def run_stdio_server():
-    """Run the server in STDIO mode for MCP Inspector"""
-    # Create the MCP server
-    mcp = create_server()
-    
-    logger.info("Starting Database MCP Server in STDIO mode for MCP Inspector")
-    # FastMCP handles its own event loop for stdio
-    mcp.run()
-
 if __name__ == "__main__":
     """Run the server when executed directly"""
     args = parse_arguments()
@@ -254,6 +245,5 @@ if __name__ == "__main__":
     if args.mode == "http":
         # Run HTTP server with uvicorn
         asyncio.run(run_http_server(args.host, args.port))
-    else:
-        # Run STDIO server for MCP Inspector (default)
-        run_stdio_server()
+
+mcp = create_server()
