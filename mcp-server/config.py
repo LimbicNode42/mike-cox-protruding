@@ -20,17 +20,15 @@ class PostgresConfig:
     port: int = 5432
     user: str = "postgres"
     password: Optional[str] = None
-    database: Optional[str] = None
-
-    @classmethod
+    database: Optional[str] = None    @classmethod
     def from_env(cls) -> "PostgresConfig":
         """Load PostgreSQL configuration from environment variables"""
         config = cls(
-            host=os.getenv("POSTGRES_HOST", "localhost"),
+            host=os.getenv("POSTGRES_HOST", "localhost").strip(),
             port=int(os.getenv("POSTGRES_PORT", "5432")),
-            user=os.getenv("POSTGRES_USER", "postgres"),
-            password=os.getenv("POSTGRES_PASSWORD"),
-            database=os.getenv("POSTGRES_DB")
+            user=os.getenv("POSTGRES_USER", "postgres").strip(),
+            password=os.getenv("POSTGRES_PASSWORD", "").strip() or None,
+            database=os.getenv("POSTGRES_DB", "").strip() or None
         )
         logger.info(f"PostgreSQL config loaded: host={config.host}, port={config.port}, user={config.user}, database={config.database}")
         return config
@@ -42,15 +40,13 @@ class RedisConfig:
     host: str = "localhost"
     port: int = 6379
     password: Optional[str] = None
-    db: int = 0
-
-    @classmethod
+    db: int = 0    @classmethod
     def from_env(cls) -> "RedisConfig":
         """Load Redis configuration from environment variables"""
         return cls(
-            host=os.getenv("REDIS_HOST", "localhost"),
+            host=os.getenv("REDIS_HOST", "localhost").strip(),
             port=int(os.getenv("REDIS_PORT", "6379")),
-            password=os.getenv("REDIS_PASSWORD"),
+            password=os.getenv("REDIS_PASSWORD", "").strip() or None,
             db=int(os.getenv("REDIS_DB", "0"))
         )
 
@@ -62,17 +58,15 @@ class MongoDBConfig:
     port: int = 27017
     user: Optional[str] = None
     password: Optional[str] = None
-    database: Optional[str] = None
-
-    @classmethod
+    database: Optional[str] = None    @classmethod
     def from_env(cls) -> "MongoDBConfig":
         """Load MongoDB configuration from environment variables"""
         return cls(
-            host=os.getenv("MONGODB_HOST", "localhost"),
+            host=os.getenv("MONGODB_HOST", "localhost").strip(),
             port=int(os.getenv("MONGODB_PORT", "27017")),
-            user=os.getenv("MONGODB_USER"),
-            password=os.getenv("MONGODB_PASSWORD"),
-            database=os.getenv("MONGODB_DB")
+            user=os.getenv("MONGODB_USER", "").strip() or None,
+            password=os.getenv("MONGODB_PASSWORD", "").strip() or None,
+            database=os.getenv("MONGODB_DB", "").strip() or None
         )
 
 
@@ -83,17 +77,15 @@ class InfluxDBConfig:
     port: int = 8086
     token: Optional[str] = None
     org: Optional[str] = None
-    bucket: Optional[str] = None
-
-    @classmethod
+    bucket: Optional[str] = None    @classmethod
     def from_env(cls) -> "InfluxDBConfig":
         """Load InfluxDB configuration from environment variables"""
         return cls(
-            host=os.getenv("INFLUXDB_HOST", "localhost"),
+            host=os.getenv("INFLUXDB_HOST", "localhost").strip(),
             port=int(os.getenv("INFLUXDB_PORT", "8086")),
-            token=os.getenv("INFLUXDB_TOKEN"),
-            org=os.getenv("INFLUXDB_ORG"),
-            bucket=os.getenv("INFLUXDB_BUCKET")
+            token=os.getenv("INFLUXDB_TOKEN", "").strip(' "') or None,
+            org=os.getenv("INFLUXDB_ORG", "").strip() or None,
+            bucket=os.getenv("INFLUXDB_BUCKET", "").strip() or None
         )
 
 

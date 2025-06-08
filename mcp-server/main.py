@@ -7,10 +7,10 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 import logging
 
-from database import DatabaseManager
-from redis_manager import RedisManager
-from mongodb_manager import MongoDBManager
-from influxdb_manager import InfluxDBManager
+from postgres_db import DatabaseManager
+from redis_db import RedisManager
+from mongodb_db import MongoDBManager
+from influxdb_db import InfluxDBManager
 from config import AppConfig
 from tools import register_database_tools
 from mcp.server.fastmcp import FastMCP
