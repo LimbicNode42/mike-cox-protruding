@@ -1,13 +1,14 @@
 """
 Redis tools for the MCP server
 """
+
 from mcp.server.fastmcp import FastMCP
 import json
 
 
 def register_redis_tools(mcp: FastMCP):
     """Register Redis-related tools with the MCP server"""
-    
+
     @mcp.tool()
     async def redis_execute_command(command: str, *args) -> str:
         """Execute a Redis command"""
@@ -31,7 +32,9 @@ def register_redis_tools(mcp: FastMCP):
         try:
             result = await redis_manager.execute_command("SET", key, value)
             await redis_manager.execute_command("SELECT", database)
-            return f"Redis key '{key}' set successfully in database {database}: {result}"
+            return (
+                f"Redis key '{key}' set successfully in database {database}: {result}"
+            )
         except Exception as e:
             return f"Failed to set Redis key '{key}': {str(e)}"
 

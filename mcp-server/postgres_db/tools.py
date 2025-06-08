@@ -1,12 +1,13 @@
 """
 PostgreSQL tools for the MCP server
 """
+
 from mcp.server.fastmcp import FastMCP
 
 
 def register_postgres_tools(mcp: FastMCP):
     """Register PostgreSQL-related tools with the MCP server"""
-    
+
     @mcp.tool()
     async def postgres_query(sql: str, database: str = "postgres") -> str:
         """Execute a SQL query on PostgreSQL and return the results"""
@@ -34,9 +35,11 @@ def register_postgres_tools(mcp: FastMCP):
             return f"PostgreSQL SQL execution failed on '{database}': {str(e)}"
 
     @mcp.tool()
-    async def postgres_create_table(database: str, table_name: str, columns: str) -> str:
+    async def postgres_create_table(
+        database: str, table_name: str, columns: str
+    ) -> str:
         """Create a new table in PostgreSQL database
-        
+
         Args:
             database: Target database name
             table_name: Name of the table to create

@@ -1,6 +1,7 @@
 """
 PostgreSQL database manager and tools package
 """
+
 from .manager import DatabaseManager
 from .tools import register_postgres_tools
 from .resources import register_postgres_resources

@@ -2,6 +2,7 @@
 Database tools and resources registry for the MCP server
 Imports and registers tools and resources from enabled database modules
 """
+
 from mcp.server.fastmcp import FastMCP
 from postgres_db import register_postgres_tools, register_postgres_resources
 from redis_db import register_redis_tools, register_redis_resources
