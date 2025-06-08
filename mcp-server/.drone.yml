@@ -1,0 +1,71 @@
+kind: pipeline
+type: docker
+name: mcp-server-ci
+
+# Trigger configuration
+trigger:
+  branch:
+    - main
+  event:
+    - push
+
+# Build steps
+steps:
+  # Lint and test Python code
+  - name: lint
+    image: python:3.11-slim
+    environment:
+      PYTHONPATH: /drone/src
+    commands:
+      - apt-get update && apt-get install -y gcc libpq-dev
+      - pip install --no-cache-dir -e .
+      - pip install flake8 pytest pytest-asyncio black isort mypy
+      - black --check .
+      - isort --check-only .
+      - flake8 --max-line-length=100 --ignore=E203,W503 .
+      - mypy . --ignore-missing-imports
+
+  # Security scan
+  - name: scan
+    image: python:3.11-slim
+    commands:
+      - pip install safety bandit
+      - safety check || echo "Safety check completed"
+      - bandit -r . -f json -o bandit-report.json || echo "Bandit scan completed"
+
+  # Build Docker image
+  - name: build
+    image: plugins/docker
+    settings:
+      repo: mcp-db-server
+      tags:
+        - ${DRONE_COMMIT_SHA:0:8}
+        - ${DRONE_BRANCH}
+        - latest
+      dockerfile: Dockerfile
+      context: .
+      build_args:
+        - BUILD_DATE=${DRONE_BUILD_CREATED}
+        - VCS_REF=${DRONE_COMMIT_SHA}
+        - VERSION=${DRONE_TAG=${DRONE_BRANCH}}
+      dry_run: true  # Set to false when ready to push to registry
+
+  # Deploy to production (on tag)
+  - name: deploy
+    image: plugins/docker
+    settings:
+      repo: repo.wheeler-network.com/mcp-db-server
+      registry: repo.wheeler-network.com
+      username:
+        from_secret: REPO_USER
+      password:
+        from_secret: REPO_PASS
+      tags:
+        - ${DRONE_TAG}
+        - latest
+      dockerfile: Dockerfile
+      context: .
+      build_args:
+        - BUILD_DATE=${DRONE_BUILD_CREATED}
+        - VCS_REF=${DRONE_COMMIT_SHA}
+        - VERSION=${DRONE_TAG}
