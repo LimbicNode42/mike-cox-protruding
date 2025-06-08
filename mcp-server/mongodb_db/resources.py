@@ -13,6 +13,8 @@ def register_mongodb_resources(mcp: FastMCP):
         """Get MongoDB server information"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return json.dumps({"error": "MongoDB is disabled in the server configuration"}, indent=2)
         try:
             info = await mongodb_manager.get_server_info()
             return json.dumps({"server_info": info}, indent=2, default=str)
@@ -24,6 +26,8 @@ def register_mongodb_resources(mcp: FastMCP):
         """List all MongoDB databases"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return json.dumps({"error": "MongoDB is disabled in the server configuration"}, indent=2)
         try:
             databases = await mongodb_manager.get_databases()
             return json.dumps({"databases": databases}, indent=2)
@@ -35,6 +39,8 @@ def register_mongodb_resources(mcp: FastMCP):
         """Get information about a MongoDB database"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return json.dumps({"error": "MongoDB is disabled in the server configuration"}, indent=2)
         try:
             info = await mongodb_manager.get_database_info(database)
             return json.dumps({
@@ -49,6 +55,8 @@ def register_mongodb_resources(mcp: FastMCP):
         """List collections in a MongoDB database"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return json.dumps({"error": "MongoDB is disabled in the server configuration"}, indent=2)
         try:
             collections = await mongodb_manager.get_collections(database)
             return json.dumps({
@@ -63,6 +71,8 @@ def register_mongodb_resources(mcp: FastMCP):
         """Get information about a MongoDB collection"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return json.dumps({"error": "MongoDB is disabled in the server configuration"}, indent=2)
         try:
             info = await mongodb_manager.get_collection_info(database, collection)
             return json.dumps({
@@ -78,6 +88,8 @@ def register_mongodb_resources(mcp: FastMCP):
         """Analyze MongoDB collection schema (sample size: 100)"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return json.dumps({"error": "MongoDB is disabled in the server configuration"}, indent=2)
         try:
             schema = await mongodb_manager.get_collection_schema(database, collection, 100)
             return json.dumps({
@@ -94,6 +106,8 @@ def register_mongodb_resources(mcp: FastMCP):
         """Get sample documents from a MongoDB collection (limit: 10)"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return json.dumps({"error": "MongoDB is disabled in the server configuration"}, indent=2)
         try:
             documents = await mongodb_manager.find_documents(database, collection, {}, 10)
             return json.dumps({

@@ -13,6 +13,8 @@ def register_redis_resources(mcp: FastMCP):
         """Get Redis server information"""
         ctx = mcp.get_context()
         redis_manager = ctx.request_context.lifespan_context.redis_manager
+        if not redis_manager:
+            return json.dumps({"error": "Redis is disabled in the server configuration"}, indent=2)
         try:
             info = await redis_manager.get_info()
             return json.dumps({"server_info": info}, indent=2, default=str)
@@ -24,6 +26,8 @@ def register_redis_resources(mcp: FastMCP):
         """List Redis databases with data"""
         ctx = mcp.get_context()
         redis_manager = ctx.request_context.lifespan_context.redis_manager
+        if not redis_manager:
+            return json.dumps({"error": "Redis is disabled in the server configuration"}, indent=2)
         try:
             databases = await redis_manager.get_databases()
             return json.dumps({"databases": databases}, indent=2)
@@ -35,6 +39,8 @@ def register_redis_resources(mcp: FastMCP):
         """List Redis keys in specified database (pattern: *)"""
         ctx = mcp.get_context()
         redis_manager = ctx.request_context.lifespan_context.redis_manager
+        if not redis_manager:
+            return json.dumps({"error": "Redis is disabled in the server configuration"}, indent=2)
         try:
             keys = await redis_manager.get_keys("*", database)
             return json.dumps({
@@ -50,6 +56,8 @@ def register_redis_resources(mcp: FastMCP):
         """Get information about a Redis key"""
         ctx = mcp.get_context()
         redis_manager = ctx.request_context.lifespan_context.redis_manager
+        if not redis_manager:
+            return json.dumps({"error": "Redis is disabled in the server configuration"}, indent=2)
         try:
             info = await redis_manager.get_key_info(key, database)
             return json.dumps({
@@ -65,6 +73,8 @@ def register_redis_resources(mcp: FastMCP):
         """Get value of a Redis key"""
         ctx = mcp.get_context()
         redis_manager = ctx.request_context.lifespan_context.redis_manager
+        if not redis_manager:
+            return json.dumps({"error": "Redis is disabled in the server configuration"}, indent=2)
         try:
             value = await redis_manager.get_value(key, database)
             return json.dumps({

@@ -104,6 +104,11 @@ class AppConfig:
     redis: RedisConfig
     mongodb: MongoDBConfig
     influxdb: InfluxDBConfig
+    # Database enable/disable toggles
+    enable_postgres: bool = True
+    enable_redis: bool = True
+    enable_mongodb: bool = True
+    enable_influxdb: bool = True
 
     @classmethod
     def from_env(cls) -> "AppConfig":
@@ -112,5 +117,9 @@ class AppConfig:
             postgres=PostgresConfig.from_env(),
             redis=RedisConfig.from_env(),
             mongodb=MongoDBConfig.from_env(),
-            influxdb=InfluxDBConfig.from_env()
+            influxdb=InfluxDBConfig.from_env(),
+            enable_postgres=os.getenv("ENABLE_POSTGRES", "true").lower().strip() in ("true", "1", "yes", "on"),
+            enable_redis=os.getenv("ENABLE_REDIS", "true").lower().strip() in ("true", "1", "yes", "on"),
+            enable_mongodb=os.getenv("ENABLE_MONGODB", "true").lower().strip() in ("true", "1", "yes", "on"),
+            enable_influxdb=os.getenv("ENABLE_INFLUXDB", "true").lower().strip() in ("true", "1", "yes", "on")
         )

@@ -13,6 +13,8 @@ def register_mongodb_tools(mcp: FastMCP):
         """Find documents in a MongoDB collection"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return "MongoDB is disabled in the server configuration"
         try:
             # Parse filter query from JSON string
             import json
@@ -27,6 +29,8 @@ def register_mongodb_tools(mcp: FastMCP):
         """Execute MongoDB aggregation pipeline"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return "MongoDB is disabled in the server configuration"
         try:
             # Parse pipeline from JSON string
             import json
@@ -41,6 +45,8 @@ def register_mongodb_tools(mcp: FastMCP):
         """Insert a document into a MongoDB collection"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return "MongoDB is disabled in the server configuration"
         try:
             # Parse document from JSON string
             import json
@@ -61,6 +67,8 @@ def register_mongodb_tools(mcp: FastMCP):
         """Update documents in a MongoDB collection"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return "MongoDB is disabled in the server configuration"
         try:
             # Parse queries from JSON strings
             import json
@@ -82,6 +90,8 @@ def register_mongodb_tools(mcp: FastMCP):
         """Delete documents from a MongoDB collection"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return "MongoDB is disabled in the server configuration"
         try:
             # Parse filter query from JSON string
             import json
@@ -102,6 +112,8 @@ def register_mongodb_tools(mcp: FastMCP):
         """Create a new collection in a MongoDB database"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
+        if not mongodb_manager:
+            return "MongoDB is disabled in the server configuration"
         try:
             # Access the MongoDB client through the manager
             client = mongodb_manager.client

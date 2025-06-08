@@ -12,6 +12,8 @@ def register_postgres_tools(mcp: FastMCP):
         """Execute a SQL query on PostgreSQL and return the results"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
+        if not db_manager:
+            return "PostgreSQL is disabled in the server configuration"
         try:
             results = await db_manager.query(database, sql)
             return f"Query executed successfully on PostgreSQL '{database}'. Results: {results}"
@@ -23,6 +25,8 @@ def register_postgres_tools(mcp: FastMCP):
         """Execute INSERT, UPDATE, DELETE, or DDL statements on PostgreSQL"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
+        if not db_manager:
+            return "PostgreSQL is disabled in the server configuration"
         try:
             result = await db_manager.execute(database, sql)
             return f"SQL executed successfully on PostgreSQL '{database}': {result}"
@@ -40,6 +44,8 @@ def register_postgres_tools(mcp: FastMCP):
         """
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
+        if not db_manager:
+            return "PostgreSQL is disabled in the server configuration"
         try:
             sql = f"CREATE TABLE {table_name} ({columns})"
             result = await db_manager.execute(database, sql)
@@ -52,6 +58,8 @@ def register_postgres_tools(mcp: FastMCP):
         """Create a new PostgreSQL database"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
+        if not db_manager:
+            return "PostgreSQL is disabled in the server configuration"
         try:
             # Use the default 'postgres' database to create new database
             sql = f"CREATE DATABASE {database_name}"

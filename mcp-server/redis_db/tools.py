@@ -13,6 +13,8 @@ def register_redis_tools(mcp: FastMCP):
         """Execute a Redis command"""
         ctx = mcp.get_context()
         redis_manager = ctx.request_context.lifespan_context.redis_manager
+        if not redis_manager:
+            return "Redis is disabled in the server configuration"
         try:
             result = await redis_manager.execute_command(command, *args)
             return f"Redis command result: {json.dumps(result, indent=2, default=str)}"
@@ -24,6 +26,8 @@ def register_redis_tools(mcp: FastMCP):
         """Set a Redis key-value pair"""
         ctx = mcp.get_context()
         redis_manager = ctx.request_context.lifespan_context.redis_manager
+        if not redis_manager:
+            return "Redis is disabled in the server configuration"
         try:
             result = await redis_manager.execute_command("SET", key, value)
             await redis_manager.execute_command("SELECT", database)
@@ -36,6 +40,8 @@ def register_redis_tools(mcp: FastMCP):
         """Delete a Redis key"""
         ctx = mcp.get_context()
         redis_manager = ctx.request_context.lifespan_context.redis_manager
+        if not redis_manager:
+            return "Redis is disabled in the server configuration"
         try:
             await redis_manager.execute_command("SELECT", database)
             result = await redis_manager.execute_command("DEL", key)
@@ -48,6 +54,8 @@ def register_redis_tools(mcp: FastMCP):
         """Flush all keys from a Redis database"""
         ctx = mcp.get_context()
         redis_manager = ctx.request_context.lifespan_context.redis_manager
+        if not redis_manager:
+            return "Redis is disabled in the server configuration"
         try:
             await redis_manager.execute_command("SELECT", database)
             result = await redis_manager.execute_command("FLUSHDB")

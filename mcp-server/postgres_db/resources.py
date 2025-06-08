@@ -13,6 +13,8 @@ def register_postgres_resources(mcp: FastMCP):
         """List all connected PostgreSQL databases"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
+        if not db_manager:
+            return json.dumps({"error": "PostgreSQL is disabled in the server configuration"}, indent=2)
         try:
             databases = db_manager.list_databases()
             return json.dumps({"databases": databases}, indent=2)
@@ -24,6 +26,8 @@ def register_postgres_resources(mcp: FastMCP):
         """List all tables in a PostgreSQL database"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
+        if not db_manager:
+            return json.dumps({"error": "PostgreSQL is disabled in the server configuration"}, indent=2)
         try:
             tables = await db_manager.list_tables(database)
             return json.dumps({"database": database, "tables": tables}, indent=2)
@@ -35,6 +39,8 @@ def register_postgres_resources(mcp: FastMCP):
         """Get column information for a PostgreSQL table"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
+        if not db_manager:
+            return json.dumps({"error": "PostgreSQL is disabled in the server configuration"}, indent=2)
         try:
             info = await db_manager.get_table_info(database, table_name)
             return json.dumps({
@@ -50,6 +56,8 @@ def register_postgres_resources(mcp: FastMCP):
         """Get PostgreSQL connection information"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
+        if not db_manager:
+            return json.dumps({"error": "PostgreSQL is disabled in the server configuration"}, indent=2)
         
         if not db_manager.databases:
             return json.dumps({"error": "No PostgreSQL connections active"}, indent=2)
@@ -69,6 +77,8 @@ def register_postgres_resources(mcp: FastMCP):
         """Get sample data from a PostgreSQL table (first 10 rows)"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
+        if not db_manager:
+            return json.dumps({"error": "PostgreSQL is disabled in the server configuration"}, indent=2)
         try:
             results = await db_manager.query(database, f"SELECT * FROM {table_name} LIMIT 10")
             return json.dumps({

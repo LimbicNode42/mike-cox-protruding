@@ -13,6 +13,10 @@ def register_influxdb_resources(mcp: FastMCP):
         """Get InfluxDB server information"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
+        
+        if influxdb_manager is None:
+            return json.dumps({"error": "InfluxDB is disabled. Please enable it in configuration to use this resource."}, indent=2)
+        
         try:
             info = await influxdb_manager.get_server_info()
             return json.dumps({"server_info": info}, indent=2, default=str)
@@ -24,6 +28,10 @@ def register_influxdb_resources(mcp: FastMCP):
         """List all InfluxDB buckets"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
+        
+        if influxdb_manager is None:
+            return json.dumps({"error": "InfluxDB is disabled. Please enable it in configuration to use this resource."}, indent=2)
+        
         try:
             buckets = await influxdb_manager.get_buckets()
             return json.dumps({"buckets": buckets}, indent=2, default=str)
@@ -35,6 +43,10 @@ def register_influxdb_resources(mcp: FastMCP):
         """List measurements in an InfluxDB bucket (last 1 hour)"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
+        
+        if influxdb_manager is None:
+            return json.dumps({"error": "InfluxDB is disabled. Please enable it in configuration to use this resource."}, indent=2)
+        
         try:
             measurements = await influxdb_manager.get_measurements(bucket, "-1h")
             return json.dumps({
@@ -50,6 +62,10 @@ def register_influxdb_resources(mcp: FastMCP):
         """Get fields for an InfluxDB measurement (last 1 hour)"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
+        
+        if influxdb_manager is None:
+            return json.dumps({"error": "InfluxDB is disabled. Please enable it in configuration to use this resource."}, indent=2)
+        
         try:
             fields = await influxdb_manager.get_fields(bucket, measurement, "-1h")
             return json.dumps({
@@ -66,6 +82,10 @@ def register_influxdb_resources(mcp: FastMCP):
         """Get tag keys for an InfluxDB measurement (last 1 hour)"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
+        
+        if influxdb_manager is None:
+            return json.dumps({"error": "InfluxDB is disabled. Please enable it in configuration to use this resource."}, indent=2)
+        
         try:
             tags = await influxdb_manager.get_tags(bucket, measurement, "-1h")
             return json.dumps({
@@ -82,6 +102,10 @@ def register_influxdb_resources(mcp: FastMCP):
         """Get values for an InfluxDB tag key (last 1 hour)"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
+        
+        if influxdb_manager is None:
+            return json.dumps({"error": "InfluxDB is disabled. Please enable it in configuration to use this resource."}, indent=2)
+        
         try:
             values = await influxdb_manager.get_tag_values(bucket, measurement, tag_key, "-1h")
             return json.dumps({
@@ -99,6 +123,10 @@ def register_influxdb_resources(mcp: FastMCP):
         """Get sample data from an InfluxDB measurement (last 1 hour, limit 10)"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
+        
+        if influxdb_manager is None:
+            return json.dumps({"error": "InfluxDB is disabled. Please enable it in configuration to use this resource."}, indent=2)
+        
         try:
             data = await influxdb_manager.get_sample_data(bucket, measurement, 10, "-1h")
             return json.dumps({
