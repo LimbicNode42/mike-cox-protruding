@@ -21,9 +21,9 @@ dev = [
     "bandit>=1.7.0",
     "safety>=2.3.0",
 ]
-
-[project.optional-dependencies.lint]
-ruff = "*"
+lint = [
+    "ruff>=0.1.0"
+]
 
 [tool.ruff]
 line-length = 88
