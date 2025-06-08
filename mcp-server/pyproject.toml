@@ -22,6 +22,9 @@ dev = [
     "safety>=2.3.0",
 ]
 
+[project.optional-dependencies.lint]
+ruff = "*"
+
 [tool.ruff]
 line-length = 88
 target-version = "py311"
