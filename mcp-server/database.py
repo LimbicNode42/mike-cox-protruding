@@ -29,6 +29,7 @@ class Database:
     async def _create_pool(self) -> None:
         """Create connection pool"""
         try:
+            logger.info(f"Attempting to connect to PostgreSQL at {self.host}:{self.port}")
             self.pool = await asyncpg.create_pool(
                 host=self.host,
                 port=self.port,
@@ -37,11 +38,14 @@ class Database:
                 password=self.password,
                 min_size=1,
                 max_size=10,
-                command_timeout=60
+                command_timeout=60,
+                server_settings={
+                    'application_name': 'mcp-server',
+                }
             )
             logger.info(f"Connected to PostgreSQL database '{self.database}' at {self.host}:{self.port}")
         except Exception as e:
-            logger.error(f"Failed to connect to database '{self.database}': {e}")
+            logger.error(f"Failed to connect to database '{self.database}' at {self.host}:{self.port}: {e}")
             raise
     
     async def disconnect(self) -> None:
@@ -56,7 +60,8 @@ class DatabaseManager:
     
     def __init__(self):
         self.databases: Dict[str, Database] = {}
-      async def add_database(self, name: str, host: str = "localhost", 
+    
+    async def add_database(self, name: str, host: str = "localhost", 
                           port: int = 5432, database: str = "postgres",
                           user: str = "postgres", password: Optional[str] = None) -> None:
         """Add a new database connection"""
