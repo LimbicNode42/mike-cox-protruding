@@ -12,7 +12,7 @@ from redis_db import RedisManager
 from mongodb_db import MongoDBManager
 from influxdb_db import InfluxDBManager
 from config import AppConfig
-from tools import register_database_tools
+from tools import register_database_tools, register_database_resources
 from mcp.server.fastmcp import FastMCP
 
 # Configure logging to stderr so it doesn't interfere with MCP JSON protocol on stdout
@@ -128,8 +128,9 @@ def create_server() -> FastMCP:
     # Create server with lifespan management
     mcp = FastMCP("Database MCP Server", lifespan=app_lifespan)
     
-    # Register all database tools
+    # Register all database tools and resources
     register_database_tools(mcp)
+    register_database_resources(mcp)
     
     return mcp
 

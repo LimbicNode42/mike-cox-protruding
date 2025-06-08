@@ -20,7 +20,9 @@ class PostgresConfig:
     port: int = 5432
     user: str = "postgres"
     password: Optional[str] = None
-    database: Optional[str] = None    @classmethod
+    database: Optional[str] = None
+    
+    @classmethod
     def from_env(cls) -> "PostgresConfig":
         """Load PostgreSQL configuration from environment variables"""
         config = cls(
@@ -40,7 +42,9 @@ class RedisConfig:
     host: str = "localhost"
     port: int = 6379
     password: Optional[str] = None
-    db: int = 0    @classmethod
+    db: int = 0
+    
+    @classmethod
     def from_env(cls) -> "RedisConfig":
         """Load Redis configuration from environment variables"""
         return cls(
@@ -58,7 +62,9 @@ class MongoDBConfig:
     port: int = 27017
     user: Optional[str] = None
     password: Optional[str] = None
-    database: Optional[str] = None    @classmethod
+    database: Optional[str] = None
+    
+    @classmethod
     def from_env(cls) -> "MongoDBConfig":
         """Load MongoDB configuration from environment variables"""
         return cls(
@@ -77,7 +83,9 @@ class InfluxDBConfig:
     port: int = 8086
     token: Optional[str] = None
     org: Optional[str] = None
-    bucket: Optional[str] = None    @classmethod
+    bucket: Optional[str] = None    
+    
+    @classmethod
     def from_env(cls) -> "InfluxDBConfig":
         """Load InfluxDB configuration from environment variables"""
         return cls(
