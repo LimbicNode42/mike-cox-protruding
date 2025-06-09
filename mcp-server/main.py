@@ -92,12 +92,11 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
             bucket=config.influxdb.bucket,
         )
     # Connect to enabled databases
-    try:
-        # Connect to PostgreSQL if enabled
+    try:  # Connect to PostgreSQL if enabled
         if config.enable_postgres and db_manager:
             try:
                 initial_db = config.postgres.database or "postgres"
-                await db_manager.add_database(
+                db_manager.add_database(
                     name=initial_db,
                     host=config.postgres.host,
                     port=config.postgres.port,
@@ -111,13 +110,13 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
 
                 # Get list of all PostgreSQL databases and connect to them
                 try:
-                    all_databases = await db_manager.list_all_databases_from_server()
+                    all_databases = db_manager.list_all_databases_from_server()
                     for db_name in all_databases:
                         if (
                             db_name != initial_db
                         ):  # Skip the initial database as we already connected
                             try:
-                                await db_manager.add_database(
+                                db_manager.add_database(
                                     name=db_name,
                                     host=config.postgres.host,
                                     port=config.postgres.port,
@@ -141,7 +140,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
         # Connect to Redis if enabled
         if config.enable_redis and redis_manager:
             try:
-                await redis_manager.connect()
+                redis_manager.connect()
                 logger.info(
                     f"Connected to Redis at {config.redis.host}:{config.redis.port}"
                 )
@@ -153,7 +152,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
         # Connect to MongoDB if enabled
         if config.enable_mongodb and mongodb_manager:
             try:
-                await mongodb_manager.connect()
+                mongodb_manager.connect()
                 logger.info(
                     f"Connected to MongoDB at {config.mongodb.host}:{config.mongodb.port}"
                 )
@@ -165,7 +164,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
         # Connect to InfluxDB if enabled
         if config.enable_influxdb and influxdb_manager:
             try:
-                await influxdb_manager.connect()
+                influxdb_manager.connect()
                 logger.info(
                     f"Connected to InfluxDB at {config.influxdb.host}:{config.influxdb.port}"
                 )
@@ -173,6 +172,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
                 logger.warning(f"Could not connect to InfluxDB: {e}")
         else:
             logger.info("InfluxDB disabled by configuration")
+
         yield AppContext(
             db_manager=db_manager,
             redis_manager=redis_manager,
@@ -183,13 +183,13 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     finally:
         # Cleanup on shutdown
         if db_manager:
-            await db_manager.disconnect_all()
+            db_manager.disconnect_all()
         if redis_manager:
-            await redis_manager.disconnect()
+            redis_manager.disconnect()
         if mongodb_manager:
-            await mongodb_manager.disconnect()
+            mongodb_manager.disconnect()
         if influxdb_manager:
-            await influxdb_manager.disconnect()
+            influxdb_manager.disconnect()
 
 
 def create_server() -> FastMCP:

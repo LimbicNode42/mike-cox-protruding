@@ -9,7 +9,7 @@ def register_mongodb_tools(mcp: FastMCP):
     """Register MongoDB-related tools with the MCP server"""
 
     @mcp.tool()
-    async def mongodb_find_documents(
+    def mongodb_find_documents(
         database: str, collection: str, filter_query: str = "{}", limit: int = 10
     ) -> str:
         """Find documents in a MongoDB collection"""
@@ -22,7 +22,7 @@ def register_mongodb_tools(mcp: FastMCP):
             import json
 
             filter_dict = json.loads(filter_query) if filter_query != "{}" else {}
-            documents = await mongodb_manager.find_documents(
+            documents = mongodb_manager.find_documents(
                 database, collection, filter_dict, limit
             )
             return f"MongoDB documents from '{collection}': {json.dumps(documents, indent=2, default=str)}"
@@ -30,7 +30,7 @@ def register_mongodb_tools(mcp: FastMCP):
             return f"Failed to find MongoDB documents: {str(e)}"
 
     @mcp.tool()
-    async def mongodb_aggregate(database: str, collection: str, pipeline: str) -> str:
+    def mongodb_aggregate(database: str, collection: str, pipeline: str) -> str:
         """Execute MongoDB aggregation pipeline"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
@@ -41,7 +41,7 @@ def register_mongodb_tools(mcp: FastMCP):
             import json
 
             pipeline_list = json.loads(pipeline)
-            results = await mongodb_manager.execute_aggregation(
+            results = mongodb_manager.execute_aggregation(
                 database, collection, pipeline_list
             )
             return f"MongoDB aggregation results: {json.dumps(results, indent=2, default=str)}"
@@ -49,9 +49,7 @@ def register_mongodb_tools(mcp: FastMCP):
             return f"Failed to execute MongoDB aggregation: {str(e)}"
 
     @mcp.tool()
-    async def mongodb_insert_document(
-        database: str, collection: str, document: str
-    ) -> str:
+    def mongodb_insert_document(database: str, collection: str, document: str) -> str:
         """Insert a document into a MongoDB collection"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
@@ -67,14 +65,14 @@ def register_mongodb_tools(mcp: FastMCP):
             client = mongodb_manager.client
             db = client[database]
             coll = db[collection]
-            result = await coll.insert_one(doc_dict)
+            result = coll.insert_one(doc_dict)
 
             return f"Document inserted successfully into '{collection}': {str(result.inserted_id)}"
         except Exception as e:
             return f"Failed to insert MongoDB document: {str(e)}"
 
     @mcp.tool()
-    async def mongodb_update_documents(
+    def mongodb_update_documents(
         database: str, collection: str, filter_query: str, update_query: str
     ) -> str:
         """Update documents in a MongoDB collection"""
@@ -93,14 +91,14 @@ def register_mongodb_tools(mcp: FastMCP):
             client = mongodb_manager.client
             db = client[database]
             coll = db[collection]
-            result = await coll.update_many(filter_dict, update_dict)
+            result = coll.update_many(filter_dict, update_dict)
 
             return f"Documents updated in '{collection}': {result.modified_count} document(s) modified"
         except Exception as e:
             return f"Failed to update MongoDB documents: {str(e)}"
 
     @mcp.tool()
-    async def mongodb_delete_documents(
+    def mongodb_delete_documents(
         database: str, collection: str, filter_query: str
     ) -> str:
         """Delete documents from a MongoDB collection"""
@@ -118,14 +116,14 @@ def register_mongodb_tools(mcp: FastMCP):
             client = mongodb_manager.client
             db = client[database]
             coll = db[collection]
-            result = await coll.delete_many(filter_dict)
+            result = coll.delete_many(filter_dict)
 
             return f"Documents deleted from '{collection}': {result.deleted_count} document(s) removed"
         except Exception as e:
             return f"Failed to delete MongoDB documents: {str(e)}"
 
     @mcp.tool()
-    async def mongodb_create_collection(database: str, collection: str) -> str:
+    def mongodb_create_collection(database: str, collection: str) -> str:
         """Create a new collection in a MongoDB database"""
         ctx = mcp.get_context()
         mongodb_manager = ctx.request_context.lifespan_context.mongodb_manager
@@ -135,7 +133,7 @@ def register_mongodb_tools(mcp: FastMCP):
             # Access the MongoDB client through the manager
             client = mongodb_manager.client
             db = client[database]
-            await db.create_collection(collection)
+            db.create_collection(collection)
 
             return f"Collection '{collection}' created successfully in database '{database}'"
         except Exception as e:

@@ -2,7 +2,6 @@
 InfluxDB database manager and operations
 """
 
-import asyncio
 import logging
 from typing import Any, Dict, List, Optional
 
@@ -30,18 +29,13 @@ class InfluxDBManager:
         self.url = f"http://{host}:{port}"
         self.client: Optional[InfluxDBClient] = None
 
-    async def connect(self):
+    def connect(self):
         """Connect to InfluxDB"""
         try:
-            # Run synchronous client creation in executor to make it async-compatible
-            loop = asyncio.get_event_loop()
-            self.client = await loop.run_in_executor(
-                None,
-                lambda: InfluxDBClient(url=self.url, token=self.token, org=self.org),
-            )
+            self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
 
             # Test connection with ready check
-            ready = await loop.run_in_executor(None, self.client.ready)
+            ready = self.client.ready()
             if ready.status == "ready":
                 logger.info(f"Connected to InfluxDB at {self.url}")
             else:
@@ -50,22 +44,20 @@ class InfluxDBManager:
             logger.error(f"Failed to connect to InfluxDB: {e}")
             raise
 
-    async def disconnect(self):
+    def disconnect(self):
         """Disconnect from InfluxDB"""
         if self.client:
-            loop = asyncio.get_event_loop()
-            await loop.run_in_executor(None, self.client.close)
+            self.client.close()
             self.client = None
 
-    async def get_buckets(self) -> List[Dict[str, Any]]:
+    def get_buckets(self) -> List[Dict[str, Any]]:
         """Get list of buckets"""
         if not self.client:
             raise ConnectionError("Not connected to InfluxDB")
 
         try:
-            loop = asyncio.get_event_loop()
             buckets_api = self.client.buckets_api()
-            buckets = await loop.run_in_executor(None, buckets_api.find_buckets)
+            buckets = buckets_api.find_buckets()
 
             bucket_list = []
             for bucket in buckets:
@@ -109,13 +101,12 @@ class InfluxDBManager:
                 }
             ]
 
-    async def get_measurements(self, bucket: str, start_time: str = "-1h") -> List[str]:
+    def get_measurements(self, bucket: str, start_time: str = "-1h") -> List[str]:
         """Get list of measurements (similar to tables) in a bucket"""
         if not self.client:
             raise ConnectionError("Not connected to InfluxDB")
 
         try:
-            loop = asyncio.get_event_loop()
             query_api = self.client.query_api()
 
             # Query to get unique measurements
@@ -124,9 +115,7 @@ class InfluxDBManager:
             schema.measurements(bucket: "{bucket}")
             """
 
-            result = await loop.run_in_executor(
-                None, query_api.query, flux_query, self.org
-            )
+            result = query_api.query(flux_query, self.org)
             measurements = []
 
             for table in result:
@@ -144,11 +133,8 @@ class InfluxDBManager:
                     |> keep(columns: ["_measurement"])
                     |> distinct(column: "_measurement")
                 """
-                loop = asyncio.get_event_loop()
                 query_api = self.client.query_api()
-                result = await loop.run_in_executor(
-                    None, query_api.query, fallback_query, self.org
-                )
+                result = query_api.query(fallback_query, self.org)
 
                 measurements = []
                 for table in result:
@@ -163,7 +149,7 @@ class InfluxDBManager:
                 )
                 return []
 
-    async def get_fields(
+    def get_fields(
         self, bucket: str, measurement: str, start_time: str = "-1h"
     ) -> List[Dict[str, Any]]:
         """Get list of fields for a measurement"""
@@ -171,7 +157,6 @@ class InfluxDBManager:
             raise ConnectionError("Not connected to InfluxDB")
 
         try:
-            loop = asyncio.get_event_loop()
             query_api = self.client.query_api()
 
             flux_query = f"""
@@ -182,9 +167,7 @@ class InfluxDBManager:
                 |> distinct(column: "_field")
             """
 
-            result = await loop.run_in_executor(
-                None, query_api.query, flux_query, self.org
-            )
+            result = query_api.query(flux_query, self.org)
             fields = []
 
             for table in result:
@@ -198,7 +181,7 @@ class InfluxDBManager:
             logger.warning(f"Failed to get fields: {e}")
             return []
 
-    async def get_tags(
+    def get_tags(
         self, bucket: str, measurement: str, start_time: str = "-1h"
     ) -> List[Dict[str, Any]]:
         """Get list of tag keys for a measurement"""
@@ -206,7 +189,6 @@ class InfluxDBManager:
             raise ConnectionError("Not connected to InfluxDB")
 
         try:
-            loop = asyncio.get_event_loop()
             query_api = self.client.query_api()
 
             # Get tag keys using schema.tagKeys
@@ -219,9 +201,7 @@ class InfluxDBManager:
             )
             """
 
-            result = await loop.run_in_executor(
-                None, query_api.query, flux_query, self.org
-            )
+            result = query_api.query(flux_query, self.org)
             tags = []
 
             for table in result:
@@ -235,7 +215,7 @@ class InfluxDBManager:
             logger.warning(f"Failed to get tags: {e}")
             return []
 
-    async def get_tag_values(
+    def get_tag_values(
         self, bucket: str, measurement: str, tag_key: str, start_time: str = "-1h"
     ) -> List[str]:
         """Get values for a specific tag key"""
@@ -243,7 +223,6 @@ class InfluxDBManager:
             raise ConnectionError("Not connected to InfluxDB")
 
         try:
-            loop = asyncio.get_event_loop()
             query_api = self.client.query_api()
 
             flux_query = f"""
@@ -256,9 +235,7 @@ class InfluxDBManager:
             )
             """
 
-            result = await loop.run_in_executor(
-                None, query_api.query, flux_query, self.org
-            )
+            result = query_api.query(flux_query, self.org)
             values = []
 
             for table in result:
@@ -272,13 +249,12 @@ class InfluxDBManager:
             logger.warning(f"Failed to get tag values: {e}")
             return []
 
-    async def query_data(self, bucket: str, flux_query: str) -> List[Dict[str, Any]]:
+    def query_data(self, bucket: str, flux_query: str) -> List[Dict[str, Any]]:
         """Execute a Flux query and return results"""
         if not self.client:
             raise ConnectionError("Not connected to InfluxDB")
 
         try:
-            loop = asyncio.get_event_loop()
             query_api = self.client.query_api()
 
             # If the query doesn't specify a bucket, add it
@@ -288,9 +264,7 @@ class InfluxDBManager:
             ):
                 flux_query = f'from(bucket: "{bucket}")\\n' + flux_query
 
-            result = await loop.run_in_executor(
-                None, query_api.query, flux_query, self.org
-            )
+            result = query_api.query(flux_query, self.org)
 
             data = []
             for table in result:
@@ -324,7 +298,7 @@ class InfluxDBManager:
             logger.error(f"Failed to execute query: {e}")
             raise
 
-    async def get_sample_data(
+    def get_sample_data(
         self, bucket: str, measurement: str, limit: int = 10, start_time: str = "-1h"
     ) -> List[Dict[str, Any]]:
         """Get sample data from a measurement"""
@@ -338,16 +312,15 @@ class InfluxDBManager:
             |> limit(n: {limit})
         """
 
-        return await self.query_data(bucket, flux_query)
+        return self.query_data(bucket, flux_query)
 
-    async def get_server_info(self) -> Dict[str, Any]:
+    def get_server_info(self) -> Dict[str, Any]:
         """Get InfluxDB server information"""
         if not self.client:
             raise ConnectionError("Not connected to InfluxDB")
 
         try:
-            loop = asyncio.get_event_loop()
-            ready = await loop.run_in_executor(None, self.client.ready)
+            ready = self.client.ready()
 
             return {
                 "status": ready.status if ready else "unknown",
