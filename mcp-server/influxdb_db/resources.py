@@ -11,7 +11,7 @@ def register_influxdb_resources(mcp: FastMCP):
     """Register InfluxDB-related resources with the MCP server"""
 
     @mcp.resource("influxdb://info")
-    async def influxdb_server_info() -> str:
+    def influxdb_server_info() -> str:
         """Get InfluxDB server information"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
@@ -25,7 +25,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
         try:
-            info = await influxdb_manager.get_server_info()
+            info = influxdb_manager.get_server_info()
             return json.dumps({"server_info": info}, indent=2, default=str)
         except Exception as e:
             return json.dumps(
@@ -33,7 +33,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
     @mcp.resource("influxdb://buckets")
-    async def influxdb_buckets() -> str:
+    def influxdb_buckets() -> str:
         """List all InfluxDB buckets"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
@@ -47,7 +47,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
         try:
-            buckets = await influxdb_manager.get_buckets()
+            buckets = influxdb_manager.get_buckets()
             return json.dumps({"buckets": buckets}, indent=2, default=str)
         except Exception as e:
             return json.dumps(
@@ -55,7 +55,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
     @mcp.resource("influxdb://buckets/{bucket}/measurements")
-    async def influxdb_measurements(bucket: str) -> str:
+    def influxdb_measurements(bucket: str) -> str:
         """List measurements in an InfluxDB bucket (last 1 hour)"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
@@ -69,7 +69,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
         try:
-            measurements = await influxdb_manager.get_measurements(bucket, "-1h")
+            measurements = influxdb_manager.get_measurements(bucket, "-1h")
             return json.dumps(
                 {"bucket": bucket, "measurements": measurements, "time_range": "-1h"},
                 indent=2,
@@ -80,7 +80,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
     @mcp.resource("influxdb://buckets/{bucket}/measurements/{measurement}/fields")
-    async def influxdb_measurement_fields(bucket: str, measurement: str) -> str:
+    def influxdb_measurement_fields(bucket: str, measurement: str) -> str:
         """Get fields for an InfluxDB measurement (last 1 hour)"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
@@ -94,7 +94,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
         try:
-            fields = await influxdb_manager.get_fields(bucket, measurement, "-1h")
+            fields = influxdb_manager.get_fields(bucket, measurement, "-1h")
             return json.dumps(
                 {
                     "bucket": bucket,
@@ -111,7 +111,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
     @mcp.resource("influxdb://buckets/{bucket}/measurements/{measurement}/tags")
-    async def influxdb_measurement_tags(bucket: str, measurement: str) -> str:
+    def influxdb_measurement_tags(bucket: str, measurement: str) -> str:
         """Get tag keys for an InfluxDB measurement (last 1 hour)"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
@@ -125,7 +125,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
         try:
-            tags = await influxdb_manager.get_tags(bucket, measurement, "-1h")
+            tags = influxdb_manager.get_tags(bucket, measurement, "-1h")
             return json.dumps(
                 {
                     "bucket": bucket,
@@ -144,7 +144,7 @@ def register_influxdb_resources(mcp: FastMCP):
     @mcp.resource(
         "influxdb://buckets/{bucket}/measurements/{measurement}/tags/{tag_key}/values"
     )
-    async def influxdb_tag_values(bucket: str, measurement: str, tag_key: str) -> str:
+    def influxdb_tag_values(bucket: str, measurement: str, tag_key: str) -> str:
         """Get values for an InfluxDB tag key (last 1 hour)"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
@@ -158,7 +158,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
         try:
-            values = await influxdb_manager.get_tag_values(
+            values = influxdb_manager.get_tag_values(
                 bucket, measurement, tag_key, "-1h"
             )
             return json.dumps(
@@ -177,7 +177,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
     @mcp.resource("influxdb://buckets/{bucket}/measurements/{measurement}/sample")
-    async def influxdb_sample_data(bucket: str, measurement: str) -> str:
+    def influxdb_sample_data(bucket: str, measurement: str) -> str:
         """Get sample data from an InfluxDB measurement (last 1 hour, limit 10)"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
@@ -191,9 +191,7 @@ def register_influxdb_resources(mcp: FastMCP):
             )
 
         try:
-            data = await influxdb_manager.get_sample_data(
-                bucket, measurement, 10, "-1h"
-            )
+            data = influxdb_manager.get_sample_data(bucket, measurement, 10, "-1h")
             return json.dumps(
                 {
                     "bucket": bucket,
