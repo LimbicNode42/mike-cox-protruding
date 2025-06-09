@@ -2,8 +2,7 @@ import logging
 import threading
 from typing import Any, Dict, List, Optional
 
-import psycopg2
-from psycopg2 import extras
+from psycopg2 import extras, pool
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ class Database:
         self.database = database
         self.user = user
         self.password = password
-        self.pool: Optional[psycopg2.pool.ThreadedConnectionPool] = None
+        self.pool: Optional[pool.ThreadedConnectionPool] = None
         self._lock = threading.Lock()
 
     @classmethod
@@ -46,14 +45,12 @@ class Database:
         try:
             logger.info(
                 f"Attempting to connect to PostgreSQL at {self.host}:{self.port}"
-            )
-
-            # Build connection string
+            )  # Build connection string
             connection_string = f"host={self.host} port={self.port} dbname={self.database} user={self.user}"
             if self.password:
                 connection_string += f" password={self.password}"
 
-            self.pool = psycopg2.pool.ThreadedConnectionPool(
+            self.pool = pool.ThreadedConnectionPool(
                 minconn=1,
                 maxconn=10,
                 dsn=connection_string,
