@@ -5,10 +5,10 @@ description = "Database MCP Server with PostgreSQL, Redis, MongoDB, and InfluxDB
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "asyncpg>=0.30.0",
+    "psycopg2-binary>=2.9.0",
     "mcp[cli]>=1.9.3",
     "redis>=5.0.0",
-    "motor>=3.3.0",
+    "pymongo>=4.0.0",
     "influxdb-client>=1.40.0",
     "aiohttp>=3.8.0",
     "python-dotenv>=1.0.0",

@@ -14,19 +14,12 @@ A Model Context Protocol (MCP) server that provides access to multiple database 
 
 ## Development
 
-### MCP Inspector Mode (Default)
-```bash
-# Run with MCP Inspector
-python main.py
-
-# Or explicitly specify stdio mode
-python main.py --mode stdio
-```
-
 ### HTTP Mode for Testing
 ```bash
 # Run HTTP server for testing
-python main.py --mode http --host localhost --port 8000
+python main.py --mode http
+
+npx @modelcontextprotocol/inspector
 ```
 
 ## Production Deployment

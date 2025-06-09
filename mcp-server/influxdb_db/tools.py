@@ -11,7 +11,7 @@ def register_influxdb_tools(mcp: FastMCP):
     """Register InfluxDB-related tools with the MCP server"""
 
     @mcp.tool()
-    async def influxdb_query(bucket: str, flux_query: str) -> str:
+    def influxdb_query(bucket: str, flux_query: str) -> str:
         """Execute a Flux query on InfluxDB"""
         ctx = mcp.get_context()
         influxdb_manager = ctx.request_context.lifespan_context.influxdb_manager
@@ -20,14 +20,15 @@ def register_influxdb_tools(mcp: FastMCP):
             return "InfluxDB is disabled. Please enable it in configuration to use this tool."
 
         try:
-            results = await influxdb_manager.query_data(bucket, flux_query)
+            results = influxdb_manager.query_data(bucket, flux_query)
             return (
                 f"InfluxDB query results: {json.dumps(results, indent=2, default=str)}"
             )
         except Exception as e:
-            return f"Failed to execute InfluxDB query: {str(e)}" @ mcp.tool()
+            return f"Failed to execute InfluxDB query: {str(e)}"
 
-    async def influxdb_write_data(
+    @mcp.tool()
+    def influxdb_write_data(
         bucket: str, measurement: str, tags: str, fields: str, timestamp: str = ""
     ) -> str:
         """Write data to InfluxDB using line protocol format
@@ -72,11 +73,10 @@ def register_influxdb_tools(mcp: FastMCP):
 
             return f"Data written successfully to InfluxDB bucket '{bucket}': {line_protocol}"
         except Exception as e:
-            return f"Failed to write data to InfluxDB: {str(e)}" @ mcp.tool()
+            return f"Failed to write data to InfluxDB: {str(e)}"
 
-    async def influxdb_create_bucket(
-        bucket_name: str, retention_period: str = "30d"
-    ) -> str:
+    @mcp.tool()
+    def influxdb_create_bucket(bucket_name: str, retention_period: str = "30d") -> str:
         """Create a new bucket in InfluxDB
 
         Args:
@@ -109,12 +109,10 @@ def register_influxdb_tools(mcp: FastMCP):
 
             return f"Bucket '{bucket_name}' created successfully with retention period '{retention_period}'"
         except Exception as e:
-            return (
-                f"Failed to create InfluxDB bucket '{bucket_name}': {str(e)}"
-                @ mcp.tool()
-            )
+            return f"Failed to create InfluxDB bucket '{bucket_name}': {str(e)}"
 
-    async def influxdb_delete_data(
+    @mcp.tool()
+    def influxdb_delete_data(
         bucket: str, start_time: str, end_time: str, predicate: str = ""
     ) -> str:
         """Delete data from InfluxDB bucket

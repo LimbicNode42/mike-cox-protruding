@@ -11,7 +11,7 @@ def register_postgres_resources(mcp: FastMCP):
     """Register PostgreSQL-related resources with the MCP server"""
 
     @mcp.resource("postgres://databases")
-    async def postgres_databases() -> str:
+    def postgres_databases() -> str:
         """List all connected PostgreSQL databases"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
@@ -29,7 +29,7 @@ def register_postgres_resources(mcp: FastMCP):
             )
 
     @mcp.resource("postgres://databases/{database}/tables")
-    async def postgres_tables(database: str) -> str:
+    def postgres_tables(database: str) -> str:
         """List all tables in a PostgreSQL database"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
@@ -39,7 +39,7 @@ def register_postgres_resources(mcp: FastMCP):
                 indent=2,
             )
         try:
-            tables = await db_manager.list_tables(database)
+            tables = db_manager.list_tables(database)
             return json.dumps({"database": database, "tables": tables}, indent=2)
         except Exception as e:
             return json.dumps(
@@ -50,7 +50,7 @@ def register_postgres_resources(mcp: FastMCP):
             )
 
     @mcp.resource("postgres://databases/{database}/tables/{table_name}/schema")
-    async def postgres_table_schema(database: str, table_name: str) -> str:
+    def postgres_table_schema(database: str, table_name: str) -> str:
         """Get column information for a PostgreSQL table"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
@@ -60,7 +60,7 @@ def register_postgres_resources(mcp: FastMCP):
                 indent=2,
             )
         try:
-            info = await db_manager.get_table_info(database, table_name)
+            info = db_manager.get_table_info(database, table_name)
             return json.dumps(
                 {"database": database, "table": table_name, "schema": info}, indent=2
             )
@@ -73,7 +73,7 @@ def register_postgres_resources(mcp: FastMCP):
             )
 
     @mcp.resource("postgres://connection")
-    async def postgres_connection_info() -> str:
+    def postgres_connection_info() -> str:
         """Get PostgreSQL connection information"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
@@ -97,7 +97,7 @@ def register_postgres_resources(mcp: FastMCP):
         return json.dumps({"connection": connection_info}, indent=2)
 
     @mcp.resource("postgres://databases/{database}/tables/{table_name}/sample")
-    async def postgres_table_sample(database: str, table_name: str) -> str:
+    def postgres_table_sample(database: str, table_name: str) -> str:
         """Get sample data from a PostgreSQL table (first 10 rows)"""
         ctx = mcp.get_context()
         db_manager = ctx.request_context.lifespan_context.db_manager
@@ -107,9 +107,7 @@ def register_postgres_resources(mcp: FastMCP):
                 indent=2,
             )
         try:
-            results = await db_manager.query(
-                database, f"SELECT * FROM {table_name} LIMIT 10"
-            )
+            results = db_manager.query(database, f"SELECT * FROM {table_name} LIMIT 10")
             return json.dumps(
                 {
                     "database": database,

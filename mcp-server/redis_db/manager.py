@@ -5,7 +5,7 @@ Redis database manager and operations
 import logging
 from typing import Any, Dict, List, Optional
 
-import redis.asyncio as redis
+import redis
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class RedisManager:
         self.db = db
         self.client: Optional[redis.Redis] = None
 
-    async def connect(self):
+    def connect(self):
         """Connect to Redis"""
         try:
             self.client = redis.Redis(
@@ -37,29 +37,29 @@ class RedisManager:
                 decode_responses=True,
             )
             # Test connection
-            await self.client.ping()
+            self.client.ping()
             logger.info(f"Connected to Redis at {self.host}:{self.port}")
         except Exception as e:
             logger.error(f"Failed to connect to Redis: {e}")
             raise
 
-    async def disconnect(self):
+    def disconnect(self):
         """Disconnect from Redis"""
         if self.client:
-            await self.client.close()
+            self.client.close()
             self.client = None
 
-    async def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> Dict[str, Any]:
         """Get Redis server information"""
         if not self.client:
             raise ConnectionError("Not connected to Redis")
-        return await self.client.info()
+        return self.client.info()
 
-    async def get_databases(self) -> List[int]:
+    def get_databases(self) -> List[int]:
         """Get list of available databases"""
         if not self.client:
             raise ConnectionError("Not connected to Redis")
-        info = await self.client.info("keyspace")
+        info = self.client.info("keyspace")
         databases = []
         for key, _value in info.items():
             if key.startswith("db"):
@@ -69,7 +69,7 @@ class RedisManager:
             sorted(databases) if databases else [0]
         )  # Default to db0 if no keyspace info
 
-    async def get_keys(self, pattern: str = "*", db: Optional[int] = None) -> List[str]:
+    def get_keys(self, pattern: str = "*", db: Optional[int] = None) -> List[str]:
         """Get keys matching pattern from specified database"""
         if not self.client:
             raise ConnectionError("Not connected to Redis")
@@ -84,16 +84,16 @@ class RedisManager:
                 decode_responses=True,
             )
             try:
-                keys = await temp_client.keys(pattern)
-                await temp_client.close()
+                keys = temp_client.keys(pattern)
+                temp_client.close()
                 return keys
             except Exception as e:
-                await temp_client.close()
+                temp_client.close()
                 raise e
         else:
-            return await self.client.keys(pattern)
+            return self.client.keys(pattern)
 
-    async def get_key_info(self, key: str, db: Optional[int] = None) -> Dict[str, Any]:
+    def get_key_info(self, key: str, db: Optional[int] = None) -> Dict[str, Any]:
         """Get information about a specific key"""
         if not self.client:
             raise ConnectionError("Not connected to Redis")
@@ -109,13 +109,9 @@ class RedisManager:
             )
 
         try:
-            key_type = await client.type(key)
-            ttl = await client.ttl(key)
-            size = (
-                await client.memory_usage(key)
-                if hasattr(client, "memory_usage")
-                else None
-            )
+            key_type = client.type(key)
+            ttl = client.ttl(key)
+            size = client.memory_usage(key) if hasattr(client, "memory_usage") else None
 
             info = {
                 "key": key,
@@ -125,15 +121,15 @@ class RedisManager:
             }
 
             if db is not None and db != self.db:
-                await client.close()
+                client.close()
 
             return info
         except Exception as e:
             if db is not None and db != self.db:
-                await client.close()
+                client.close()
             raise e
 
-    async def get_value(self, key: str, db: Optional[int] = None) -> Any:
+    def get_value(self, key: str, db: Optional[int] = None) -> Any:
         """Get value of a key with automatic type detection"""
         if not self.client:
             raise ConnectionError("Not connected to Redis")
@@ -149,32 +145,32 @@ class RedisManager:
             )
 
         try:
-            key_type = await client.type(key)
+            key_type = client.type(key)
 
             if key_type == "string":
-                value = await client.get(key)
+                value = client.get(key)
             elif key_type == "list":
-                value = await client.lrange(key, 0, -1)
+                value = client.lrange(key, 0, -1)
             elif key_type == "set":
-                value = await client.smembers(key)
+                value = client.smembers(key)
             elif key_type == "zset":
-                value = await client.zrange(key, 0, -1, withscores=True)
+                value = client.zrange(key, 0, -1, withscores=True)
             elif key_type == "hash":
-                value = await client.hgetall(key)
+                value = client.hgetall(key)
             else:
                 value = f"Unsupported type: {key_type}"
 
             if db is not None and db != self.db:
-                await client.close()
+                client.close()
 
             return value
         except Exception as e:
             if db is not None and db != self.db:
-                await client.close()
+                client.close()
             raise e
 
-    async def execute_command(self, command: str, *args) -> Any:
+    def execute_command(self, command: str, *args) -> Any:
         """Execute a Redis command"""
         if not self.client:
             raise ConnectionError("Not connected to Redis")
-        return await self.client.execute_command(command, *args)
+        return self.client.execute_command(command, *args)
