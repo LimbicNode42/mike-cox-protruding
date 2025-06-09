@@ -31,8 +31,8 @@ def register_redis_tools(mcp: FastMCP):
         if not redis_manager:
             return "Redis is disabled in the server configuration"
         try:
-            result = redis_manager.execute_command("SET", key, value)
             redis_manager.execute_command("SELECT", database)
+            result = redis_manager.execute_command("SET", key, value)
             return (
                 f"Redis key '{key}' set successfully in database {database}: {result}"
             )
