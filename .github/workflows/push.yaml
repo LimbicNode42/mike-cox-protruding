@@ -67,7 +67,7 @@ jobs:
           name: bandit-report
           path: mcp-server/bandit-report.json
 
-  build-and-push:
+  publish-to-registry:
     runs-on: ubuntu-latest
     needs: [lint, security-scan]
     steps:
