@@ -101,7 +101,7 @@ class DatabaseManager:
             )
         return self.databases[name]
 
-    def list_databases(self) -> List[str]:
+    async def list_databases(self) -> List[str]:
         """List all available database connection names"""
         return list(self.databases.keys())
 

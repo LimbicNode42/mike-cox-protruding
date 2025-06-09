@@ -259,5 +259,3 @@ if __name__ == "__main__":
     if args.mode == "http":
         # Run HTTP server with uvicorn
         asyncio.run(run_http_server(args.host, args.port))
-
-mcp = create_server()
