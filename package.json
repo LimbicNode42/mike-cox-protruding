@@ -1,0 +1,66 @@
+{
+  "name": "@mc-pea/db-mcp-server",
+  "version": "1.0.0",
+  "description": "Database MCP Server supporting PostgreSQL, Redis, MongoDB, and InfluxDB",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "db-mcp-server": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "jest tests/unit --testMatch='**/*.test.ts'",
+    "test:integration": "jest tests/integration --testMatch='**/*.test.ts'",
+    "test:validation": "jest tests/validation --testMatch='**/*.test.ts'",
+    "test:mcp": "node tests/simple-test.mjs",
+    "validate": "node ../../tests/validate-template.js .",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "dependencies": {
+    "@influxdata/influxdb-client": "^1.35.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "ioredis": "^5.6.1",
+    "mongodb": "^6.17.0",
+    "pg": "^8.16.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.19.4",
+    "@types/pg": "^8.15.4",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "tsx": "^4.15.7",
+    "typescript": "^5.4.5"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "database",
+    "postgresql",
+    "redis",
+    "mongodb",
+    "influxdb",
+    "mc-pea"
+  ],
+  "author": "MC-PEA Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LimbicNode42/mike-cox-protruding.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
