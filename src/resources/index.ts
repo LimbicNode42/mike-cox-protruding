@@ -1,12 +1,16 @@
 /**
  * Database MCP Server - Resource Registration
  * 
- * Provides resources for database schema, connection status, and metadata.
+ * Registers all database resources with the MCP server.
+ * Organized by database type for better maintainability.
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { DatabaseSession, DatabaseConfig } from '../types/session.js';
-import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import { DatabaseSession, DatabaseConfig, getOrCreateSession } from '../types/session.js';
+import { registerPostgresResources } from './postgres.js';
+import { registerRedisResources } from './redis.js';
+import { registerMongoResources } from './mongodb.js';
+import { registerInfluxResources } from './influxdb.js';
 
 /**
  * Register all database resources with the MCP server
@@ -18,6 +22,26 @@ export function registerDatabaseResources(
 ): void {
   console.error('📚 Registering database resources...');
 
+  // Register PostgreSQL resources (primary database, always enabled)
+  registerPostgresResources(server, config, sessions);
+
+  // Register Redis resources if enabled in config
+  if (config.redis?.enabled) {
+    registerRedisResources(server, config, sessions);
+  }
+
+  // Register MongoDB resources if enabled in config
+  if (config.mongodb?.enabled) {
+    registerMongoResources(server, config, sessions);
+  }
+
+  // Register InfluxDB resources if enabled in config
+  if (config.influxdb?.enabled) {
+    registerInfluxResources(server, config, sessions);
+  }
+
+  // ========== GENERAL RESOURCES ==========
+  
   // Database connection status resource
   server.registerResource(
     'connection-status',
@@ -29,231 +53,63 @@ export function registerDatabaseResources(
     },
     async (uri: URL) => {
       try {
+        const sessionId = 'default';
+        const session = await getOrCreateSession(sessionId, config, sessions);
+        
         const status = {
-          timestamp: new Date().toISOString(),
-          databases: {
-            postgres: {
-              enabled: config.postgres.enabled,
-              configured: !!config.postgres.url,
-              connected: false
-            },
-            redis: {
-              enabled: config.redis?.enabled || false,
-              configured: !!config.redis?.url,
-              connected: false
-            },
-            mongodb: {
-              enabled: config.mongodb?.enabled || false,
-              configured: !!config.mongodb?.url,
-              connected: false
-            },
-            influxdb: {
-              enabled: config.influxdb?.enabled || false,
-              configured: !!(config.influxdb?.url && config.influxdb?.token),
-              connected: false
-            }
-          },
-          activeSessions: sessions.size
-        };
-
-        // Check actual connection status for active sessions
-        for (const [sessionId, session] of sessions) {
-          if (session.clients.postgres) {
-            status.databases.postgres.connected = true;
-          }
-          if (session.clients.redis) {
-            status.databases.redis.connected = true;
-          }
-          if (session.clients.mongodb) {
-            status.databases.mongodb.connected = true;
-          }
-          if (session.clients.influxdb) {
-            status.databases.influxdb.connected = true;
-          }
-        }
-
-        return {
-          contents: [
-            {
-              uri: uri.href,
-              mimeType: 'application/json',
-              text: JSON.stringify(status, null, 2)
-            }
-          ]
-        };
-      } catch (error) {
-        throw new McpError(
-          ErrorCode.InternalError,
-          `Failed to get connection status: ${error instanceof Error ? error.message : 'Unknown error'}`
-        );
-      }
-    }
-  );
-
-  // Database configuration resource
-  server.registerResource(
-    'config-current',
-    'db://config/current',
-    {
-      name: 'Database Configuration',
-      description: 'Current database configuration (without sensitive data)',
-      mimeType: 'application/json'
-    },
-    async (uri: URL) => {
-      try {
-        const safeConfig = {
           postgres: {
-            enabled: config.postgres.enabled,
-            hasUrl: !!config.postgres.url
+            enabled: true,
+            connected: !!session.clients.postgres,
+            config: {
+              host: config.postgres.url ? new URL(config.postgres.url).hostname : 'localhost',
+              port: config.postgres.url ? new URL(config.postgres.url).port : '5432'
+            }
           },
           redis: {
-            enabled: config.redis?.enabled || false,
-            hasUrl: !!config.redis?.url
+            enabled: !!config.redis?.enabled,
+            connected: !!session.clients.redis,
+            config: config.redis?.enabled ? {
+              url: config.redis.url || 'redis://localhost:6379'
+            } : null
           },
           mongodb: {
-            enabled: config.mongodb?.enabled || false,
-            hasUrl: !!config.mongodb?.url
+            enabled: !!config.mongodb?.enabled,
+            connected: !!session.clients.mongodb,
+            config: config.mongodb?.enabled ? {
+              url: config.mongodb.url || 'mongodb://localhost:27017'
+            } : null
           },
           influxdb: {
-            enabled: config.influxdb?.enabled || false,
-            hasUrl: !!config.influxdb?.url,
-            hasToken: !!config.influxdb?.token,
-            org: config.influxdb?.org,
-            bucket: config.influxdb?.bucket
+            enabled: !!config.influxdb?.enabled,
+            connected: !!session.clients.influxdb,
+            config: config.influxdb?.enabled ? {
+              url: config.influxdb.url,
+              org: config.influxdb.org,
+              bucket: config.influxdb.bucket
+            } : null
           }
         };
-
+        
         return {
-          contents: [
-            {
-              uri: uri.href,
-              mimeType: 'application/json',
-              text: JSON.stringify(safeConfig, null, 2)
-            }
-          ]
+          contents: [{
+            uri: uri.href,
+            mimeType: 'application/json',
+            text: JSON.stringify({ status }, null, 2)
+          }]
         };
       } catch (error) {
-        throw new McpError(
-          ErrorCode.InternalError,
-          `Failed to get configuration: ${error instanceof Error ? error.message : 'Unknown error'}`
-        );
+        return {
+          contents: [{
+            uri: uri.href,
+            mimeType: 'application/json',
+            text: JSON.stringify({ 
+              error: `Failed to get connection status: ${error instanceof Error ? error.message : 'Unknown error'}` 
+            }, null, 2)
+          }]
+        };
       }
     }
   );
 
-  // Server capabilities resource
-  server.registerResource(
-    'server-capabilities',
-    'db://server/capabilities',
-    {
-      name: 'Server Capabilities',
-      description: 'Available database server capabilities and tools',
-      mimeType: 'application/json'
-    },
-    async (uri: URL) => {
-      try {
-        const capabilities = {
-          server: {
-            name: 'db-mcp-server',
-            version: '1.0.0',
-            description: 'Database MCP Server supporting PostgreSQL, Redis, MongoDB, and InfluxDB'
-          },
-          supportedDatabases: {
-            postgresql: {
-              enabled: config.postgres.enabled,
-              tools: ['postgres_query', 'postgres_execute', 'postgres_create_table', 'postgres_create_database'],
-              description: 'Primary relational database with full SQL support'
-            },
-            redis: {
-              enabled: config.redis?.enabled || false,
-              tools: ['redis_get', 'redis_set', 'redis_delete', 'redis_keys'],
-              description: 'In-memory data structure store for caching'
-            },
-            mongodb: {
-              enabled: config.mongodb?.enabled || false,
-              tools: ['mongodb_find', 'mongodb_insert', 'mongodb_update', 'mongodb_delete'],
-              description: 'Document-oriented NoSQL database'
-            },
-            influxdb: {
-              enabled: config.influxdb?.enabled || false,
-              tools: ['influxdb_write', 'influxdb_query', 'influxdb_delete'],
-              description: 'Time series database for metrics and events'
-            }
-          },
-          resources: [
-            'db://connections/status',
-            'db://config/current',
-            'db://server/capabilities',
-            'db://sessions/active'
-          ]
-        };
-
-        return {
-          contents: [
-            {
-              uri: uri.href,
-              mimeType: 'application/json',
-              text: JSON.stringify(capabilities, null, 2)
-            }
-          ]
-        };
-      } catch (error) {
-        throw new McpError(
-          ErrorCode.InternalError,
-          `Failed to get capabilities: ${error instanceof Error ? error.message : 'Unknown error'}`
-        );
-      }
-    }
-  );
-
-  // Active sessions resource
-  server.registerResource(
-    'sessions-active',
-    'db://sessions/active',
-    {
-      name: 'Active Sessions',
-      description: 'Information about currently active database sessions',
-      mimeType: 'application/json'
-    },
-    async (uri: URL) => {
-      try {
-        const sessionInfo = [];
-        for (const [sessionId, session] of sessions) {
-          sessionInfo.push({
-            sessionId,
-            createdAt: session.createdAt,
-            connectedDatabases: {
-              postgres: !!session.clients.postgres,
-              redis: !!session.clients.redis,
-              mongodb: !!session.clients.mongodb,
-              influxdb: !!session.clients.influxdb
-            }
-          });
-        }
-
-        const activeSessionsData = {
-          timestamp: new Date().toISOString(),
-          totalSessions: sessions.size,
-          sessions: sessionInfo
-        };
-
-        return {
-          contents: [
-            {
-              uri: uri.href,
-              mimeType: 'application/json',
-              text: JSON.stringify(activeSessionsData, null, 2)
-            }
-          ]
-        };
-      } catch (error) {
-        throw new McpError(
-          ErrorCode.InternalError,
-          `Failed to get active sessions: ${error instanceof Error ? error.message : 'Unknown error'}`
-        );
-      }
-    }
-  );
-
-  console.error('✅ Database resources registered');
+  console.error('✅ All database resources registered');
 }
