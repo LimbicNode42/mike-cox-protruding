@@ -1,6 +1,6 @@
 /**
  * Database Tools Exports
- * 
+ *
  * This file provides a centralized export for all database tool functions.
  */
 
@@ -15,5 +15,5 @@ export default {
   registerPostgresTools,
   registerRedisTools,
   registerMongoTools,
-  registerInfluxTools
+  registerInfluxTools,
 };

@@ -1,6 +1,6 @@
 /**
  * Test MCP Client for Database MCP Server
- * 
+ *
  * This test connects to the db-mcp-server and validates that it's working
  * correctly by listing available tools and testing basic functionality.
  */
@@ -16,26 +16,29 @@ const __dirname = dirname(__filename);
 
 async function testDbMcpServer() {
   console.log('🧪 Testing Database MCP Server...');
-  
+
   // Start the db-mcp-server as a child process
   const serverPath = join(__dirname, '../dist/index.js');
   const serverProcess = spawn('node', [serverPath, '--stdio'], {
-    stdio: ['pipe', 'pipe', 'inherit']
+    stdio: ['pipe', 'pipe', 'inherit'],
   });
 
   try {
     // Create MCP client
     const transport = new StdioClientTransport({
       stdin: serverProcess.stdin,
-      stdout: serverProcess.stdout
+      stdout: serverProcess.stdout,
     });
 
-    const client = new Client({
-      name: 'test-client',
-      version: '1.0.0'
-    }, {
-      capabilities: {}
-    });
+    const client = new Client(
+      {
+        name: 'test-client',
+        version: '1.0.0',
+      },
+      {
+        capabilities: {},
+      }
+    );
 
     await client.connect(transport);
     console.log('✅ Successfully connected to Database MCP Server');
@@ -54,7 +57,7 @@ async function testDbMcpServer() {
       console.log('\n🐘 Testing PostgreSQL query tool...');
       try {
         const result = await client.callTool('postgres_query', {
-          query: 'SELECT version() as version'
+          query: 'SELECT version() as version',
         });
         console.log('PostgreSQL query result:', result);
       } catch (error) {
@@ -68,7 +71,7 @@ async function testDbMcpServer() {
       console.log('\n🔴 Testing Redis get tool...');
       try {
         const result = await client.callTool('redis_get', {
-          key: 'test-key'
+          key: 'test-key',
         });
         console.log('Redis get result:', result);
       } catch (error) {
@@ -77,7 +80,6 @@ async function testDbMcpServer() {
     }
 
     console.log('\n✅ Database MCP Server test completed successfully!');
-
   } catch (error) {
     console.error('❌ Test failed:', error);
     throw error;

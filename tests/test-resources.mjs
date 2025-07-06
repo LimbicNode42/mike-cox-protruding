@@ -1,6 +1,6 @@
 /**
  * Test MCP Server Resources
- * 
+ *
  * This script tests the db-mcp-server resources using the MCP SDK client.
  */
 
@@ -26,14 +26,14 @@ async function testResources() {
       version: '1.0.0',
     },
     {
-      capabilities: {}
+      capabilities: {},
     }
   );
 
   // Create transport
   const transport = new StdioClientTransport({
     command: 'node',
-    args: [serverPath, '--mode', 'stdio']
+    args: [serverPath, '--mode', 'stdio'],
   });
 
   try {
@@ -46,7 +46,7 @@ async function testResources() {
     console.log('\n📚 Listing resources...');
     const resourcesResult = await client.request({
       method: 'resources/list',
-      params: {}
+      params: {},
     });
 
     console.log('✅ Resources found:', resourcesResult.resources?.length || 0);
@@ -57,15 +57,15 @@ async function testResources() {
     // Test reading each resource
     if (resourcesResult.resources && resourcesResult.resources.length > 0) {
       console.log('\n🔍 Testing resource reads...');
-      
+
       for (const resource of resourcesResult.resources) {
         try {
           console.log(`\n📖 Reading: ${resource.name}`);
           const readResult = await client.request({
             method: 'resources/read',
             params: {
-              uri: resource.uri
-            }
+              uri: resource.uri,
+            },
           });
 
           console.log(`✅ Successfully read ${resource.name}`);
@@ -73,7 +73,7 @@ async function testResources() {
             const content = readResult.contents[0];
             console.log(`   📄 Content type: ${content.mimeType}`);
             console.log(`   📏 Content length: ${content.text?.length || 0} chars`);
-            
+
             // Parse JSON content for preview
             if (content.mimeType === 'application/json' && content.text) {
               try {
@@ -91,7 +91,6 @@ async function testResources() {
     }
 
     console.log('\n✅ Resource test completed successfully!');
-
   } catch (error) {
     console.error('❌ Test failed:', error.message);
     process.exit(1);

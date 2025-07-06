@@ -1,6 +1,6 @@
 /**
  * Database MCP Server - Resource Registration
- * 
+ *
  * Registers all database resources with the MCP server.
  * Organized by database type for better maintainability.
  */
@@ -41,7 +41,7 @@ export function registerDatabaseResources(
   }
 
   // ========== GENERAL RESOURCES ==========
-  
+
   // Database connection status resource
   server.registerResource(
     'connection-status',
@@ -49,63 +49,77 @@ export function registerDatabaseResources(
     {
       name: 'Database Connection Status',
       description: 'Current status of all database connections',
-      mimeType: 'application/json'
+      mimeType: 'application/json',
     },
     async (uri: URL) => {
       try {
         const sessionId = 'default';
         const session = await getOrCreateSession(sessionId, config, sessions);
-        
+
         const status = {
           postgres: {
             enabled: true,
             connected: !!session.clients.postgres,
             config: {
               host: config.postgres.url ? new URL(config.postgres.url).hostname : 'localhost',
-              port: config.postgres.url ? new URL(config.postgres.url).port : '5432'
-            }
+              port: config.postgres.url ? new URL(config.postgres.url).port : '5432',
+            },
           },
           redis: {
             enabled: !!config.redis?.enabled,
             connected: !!session.clients.redis,
-            config: config.redis?.enabled ? {
-              url: config.redis.url || 'redis://localhost:6379'
-            } : null
+            config: config.redis?.enabled
+              ? {
+                  url: config.redis.url || 'redis://localhost:6379',
+                }
+              : null,
           },
           mongodb: {
             enabled: !!config.mongodb?.enabled,
             connected: !!session.clients.mongodb,
-            config: config.mongodb?.enabled ? {
-              url: config.mongodb.url || 'mongodb://localhost:27017'
-            } : null
+            config: config.mongodb?.enabled
+              ? {
+                  url: config.mongodb.url || 'mongodb://localhost:27017',
+                }
+              : null,
           },
           influxdb: {
             enabled: !!config.influxdb?.enabled,
             connected: !!session.clients.influxdb,
-            config: config.influxdb?.enabled ? {
-              url: config.influxdb.url,
-              org: config.influxdb.org,
-              bucket: config.influxdb.bucket
-            } : null
-          }
+            config: config.influxdb?.enabled
+              ? {
+                  url: config.influxdb.url,
+                  org: config.influxdb.org,
+                  bucket: config.influxdb.bucket,
+                }
+              : null,
+          },
         };
-        
+
         return {
-          contents: [{
-            uri: uri.href,
-            mimeType: 'application/json',
-            text: JSON.stringify({ status }, null, 2)
-          }]
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: 'application/json',
+              text: JSON.stringify({ status }, null, 2),
+            },
+          ],
         };
       } catch (error) {
         return {
-          contents: [{
-            uri: uri.href,
-            mimeType: 'application/json',
-            text: JSON.stringify({ 
-              error: `Failed to get connection status: ${error instanceof Error ? error.message : 'Unknown error'}` 
-            }, null, 2)
-          }]
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: 'application/json',
+              text: JSON.stringify(
+                {
+                  error: `Failed to get connection status: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                },
+                null,
+                2
+              ),
+            },
+          ],
         };
       }
     }

@@ -20,41 +20,55 @@ export function registerRedisResources(
     {
       name: 'Redis Server Info',
       description: 'Get Redis server information',
-      mimeType: 'application/json'
+      mimeType: 'application/json',
     },
     async (uri: URL) => {
       try {
         const sessionId = 'default';
         const session = await getOrCreateSession(sessionId, config, sessions);
-        
+
         if (!session.clients.redis) {
           return {
-            contents: [{
-              uri: uri.href,
-              mimeType: 'application/json',
-              text: JSON.stringify({ error: 'Redis is disabled in the server configuration' }, null, 2)
-            }]
+            contents: [
+              {
+                uri: uri.href,
+                mimeType: 'application/json',
+                text: JSON.stringify(
+                  { error: 'Redis is disabled in the server configuration' },
+                  null,
+                  2
+                ),
+              },
+            ],
           };
         }
-        
+
         const info = await session.clients.redis.info();
-        
+
         return {
-          contents: [{
-            uri: uri.href,
-            mimeType: 'application/json',
-            text: JSON.stringify({ server_info: info }, null, 2)
-          }]
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: 'application/json',
+              text: JSON.stringify({ server_info: info }, null, 2),
+            },
+          ],
         };
       } catch (error) {
         return {
-          contents: [{
-            uri: uri.href,
-            mimeType: 'application/json',
-            text: JSON.stringify({ 
-              error: `Failed to get Redis info: ${error instanceof Error ? error.message : 'Unknown error'}` 
-            }, null, 2)
-          }]
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: 'application/json',
+              text: JSON.stringify(
+                {
+                  error: `Failed to get Redis info: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                },
+                null,
+                2
+              ),
+            },
+          ],
         };
       }
     }
@@ -67,23 +81,29 @@ export function registerRedisResources(
     {
       name: 'Redis Databases',
       description: 'List Redis databases with data',
-      mimeType: 'application/json'
+      mimeType: 'application/json',
     },
     async (uri: URL) => {
       try {
         const sessionId = 'default';
         const session = await getOrCreateSession(sessionId, config, sessions);
-        
+
         if (!session.clients.redis) {
           return {
-            contents: [{
-              uri: uri.href,
-              mimeType: 'application/json',
-              text: JSON.stringify({ error: 'Redis is disabled in the server configuration' }, null, 2)
-            }]
+            contents: [
+              {
+                uri: uri.href,
+                mimeType: 'application/json',
+                text: JSON.stringify(
+                  { error: 'Redis is disabled in the server configuration' },
+                  null,
+                  2
+                ),
+              },
+            ],
           };
         }
-        
+
         // Check databases 0-15 for keys
         const databases = [];
         for (let i = 0; i < 16; i++) {
@@ -97,23 +117,31 @@ export function registerRedisResources(
             // Skip databases that don't exist or can't be accessed
           }
         }
-        
+
         return {
-          contents: [{
-            uri: uri.href,
-            mimeType: 'application/json',
-            text: JSON.stringify({ databases }, null, 2)
-          }]
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: 'application/json',
+              text: JSON.stringify({ databases }, null, 2),
+            },
+          ],
         };
       } catch (error) {
         return {
-          contents: [{
-            uri: uri.href,
-            mimeType: 'application/json',
-            text: JSON.stringify({ 
-              error: `Failed to list Redis databases: ${error instanceof Error ? error.message : 'Unknown error'}` 
-            }, null, 2)
-          }]
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: 'application/json',
+              text: JSON.stringify(
+                {
+                  error: `Failed to list Redis databases: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                },
+                null,
+                2
+              ),
+            },
+          ],
         };
       }
     }

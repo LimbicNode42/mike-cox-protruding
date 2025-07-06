@@ -1,6 +1,6 @@
 /**
  * Simple Test for Database MCP Server
- * 
+ *
  * This test validates that the server builds and initializes correctly.
  */
 
@@ -8,7 +8,7 @@ import { createServer, config, serverConfig } from '../dist/index.js';
 
 async function testDbMcpServer() {
   console.log('🧪 Testing Database MCP Server initialization...');
-  
+
   try {
     console.log('📋 Server configuration:');
     console.log(`  Name: ${serverConfig.serverName}`);
@@ -20,7 +20,7 @@ async function testDbMcpServer() {
 
     console.log('\n🔧 Creating server instance...');
     const server = createServer();
-    
+
     if (server) {
       console.log('✅ Server instance created successfully');
       console.log('🛠️  Server name:', server.name);
@@ -31,7 +31,6 @@ async function testDbMcpServer() {
 
     console.log('\n✅ Database MCP Server test completed successfully!');
     return true;
-
   } catch (error) {
     console.error('❌ Test failed:', error);
     throw error;

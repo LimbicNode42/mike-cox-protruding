@@ -1,6 +1,6 @@
 /**
  * Database Session Types and Management
- * 
+ *
  * Defines session structures and client initialization for database connections.
  * Supports multiple database types with proper connection management and cleanup.
  */
@@ -58,17 +58,15 @@ export interface DatabaseSession {
 /**
  * Initialize database clients for a session
  */
-export async function initializeSessionClients(
-  config: DatabaseConfig
-): Promise<DatabaseClients> {
+export async function initializeSessionClients(config: DatabaseConfig): Promise<DatabaseClients> {
   const clients: DatabaseClients = {};
-  
+
   // Initialize PostgreSQL client
   if (config.postgres.enabled && config.postgres.url) {
     try {
       const postgres = new PostgresClient({
         connectionString: config.postgres.url,
-        ssl: config.postgres.url.includes('localhost') ? false : { rejectUnauthorized: false }
+        ssl: config.postgres.url.includes('localhost') ? false : { rejectUnauthorized: false },
       });
       await postgres.connect();
       clients.postgres = postgres;
@@ -107,7 +105,7 @@ export async function initializeSessionClients(
     try {
       const influxdb = new InfluxDB({
         url: config.influxdb.url,
-        token: config.influxdb.token
+        token: config.influxdb.token,
       });
       clients.influxdb = influxdb;
       console.error(`InfluxDB client connected`);
@@ -127,7 +125,7 @@ export async function createDatabaseSession(
   config: DatabaseConfig
 ): Promise<DatabaseSession> {
   const clients = await initializeSessionClients(config);
-  
+
   return {
     id: sessionId,
     createdAt: new Date(),
@@ -165,7 +163,7 @@ export async function createDatabaseSession(
       if (clients.influxdb) {
         console.error(`[${sessionId}] InfluxDB client cleanup (no explicit disconnect needed)`);
       }
-    }
+    },
   };
 }
 
@@ -178,7 +176,7 @@ export async function getOrCreateSession(
   sessions: Map<string, DatabaseSession>
 ): Promise<DatabaseSession> {
   let session = sessions.get(sessionId);
-  
+
   if (!session) {
     console.error(`Creating new session: ${sessionId}`);
     session = await createDatabaseSession(sessionId, config);

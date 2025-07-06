@@ -1,6 +1,6 @@
 /**
  * Database MCP Server - Tool and Resource Registration
- * 
+ *
  * Registers all database tools and resources with the MCP server.
  * Supports multiple database types with session-aware operations.
  */

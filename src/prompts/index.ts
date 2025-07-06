@@ -1,6 +1,6 @@
 /**
  * Prompt definitions for Database MCP Server
- * 
+ *
  * This file exports prompt templates that can be used by the server.
  * These prompts provide context and guidance for interacting with databases.
  */

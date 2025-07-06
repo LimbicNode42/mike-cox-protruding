@@ -1,12 +1,12 @@
 /**
  * Database MCP Server - Main Entry Point
- * 
+ *
  * A comprehensive database management MCP server supporting multiple database types:
  * - PostgreSQL (primary)
  * - Redis (caching)
  * - MongoDB (document store)
  * - InfluxDB (time series)
- * 
+ *
  * This server follows MC-PEA architectural standards and integrates with
  * Keycloak authentication and Infisical secrets management.
  */
@@ -38,23 +38,23 @@ if (missingVars.length > 0) {
 const config: DatabaseConfig = {
   postgres: {
     enabled: process.env.ENABLE_POSTGRES !== 'false',
-    url: process.env.POSTGRES_URL || process.env.DATABASE_URL || undefined
+    url: process.env.POSTGRES_URL || process.env.DATABASE_URL || undefined,
   },
   redis: {
     enabled: process.env.ENABLE_REDIS === 'true',
-    url: process.env.REDIS_URL || undefined
+    url: process.env.REDIS_URL || undefined,
   },
   mongodb: {
     enabled: process.env.ENABLE_MONGODB === 'true',
-    url: process.env.MONGODB_URL || undefined
+    url: process.env.MONGODB_URL || undefined,
   },
   influxdb: {
     enabled: process.env.ENABLE_INFLUXDB === 'true',
     url: process.env.INFLUXDB_URL || undefined,
     token: process.env.INFLUXDB_TOKEN || undefined,
     org: process.env.INFLUXDB_ORG || undefined,
-    bucket: process.env.INFLUXDB_BUCKET || undefined
-  }
+    bucket: process.env.INFLUXDB_BUCKET || undefined,
+  },
 };
 
 const serverConfig = {
@@ -62,7 +62,7 @@ const serverConfig = {
   apiKey: process.env.API_KEY!,
   nodeEnv: process.env.NODE_ENV || 'development',
   serverName: 'db-mcp-server',
-  serverVersion: '1.0.0'
+  serverVersion: '1.0.0',
 };
 
 // Session storage for stateful HTTP transport
@@ -161,7 +161,9 @@ async function main() {
     ? parseInt(args[args.indexOf('--port') + 1] || serverConfig.port.toString())
     : serverConfig.port;
 
-  console.error(`🚀 Starting ${serverConfig.serverName} v${serverConfig.serverVersion} in ${mode} mode`);
+  console.error(
+    `🚀 Starting ${serverConfig.serverName} v${serverConfig.serverVersion} in ${mode} mode`
+  );
   console.error(`📊 Database support:`);
   console.error(`   PostgreSQL: ${config.postgres.enabled ? '✅' : '❌'}`);
   console.error(`   Redis: ${config.redis?.enabled ? '✅' : '❌'}`);
@@ -346,9 +348,11 @@ async function runStatefulHttpServer(host: string, port: number) {
           delete transports[transport.sessionId];
           const session = sessions.get(transport.sessionId);
           if (session) {
-            session.cleanup().catch(err => 
-              console.error(`Error cleaning up session ${transport.sessionId}:`, err)
-            );
+            session
+              .cleanup()
+              .catch(err =>
+                console.error(`Error cleaning up session ${transport.sessionId}:`, err)
+              );
             sessions.delete(transport.sessionId);
           }
         }
@@ -414,22 +418,22 @@ async function runStatefulHttpServer(host: string, port: number) {
 
   app.listen(port, host, () => {
     const authEnabled = !!serverConfig.apiKey;
-    console.error(
-      `✅ Database MCP Server started in STATEFUL HTTP mode on ${host}:${port}`
-    );
+    console.error(`✅ Database MCP Server started in STATEFUL HTTP mode on ${host}:${port}`);
     console.error(`🔍 Health check available at: http://${host}:${port}/health`);
     console.error(`🔌 MCP endpoint available at: http://${host}:${port}/mcp`);
     console.error(
       `🔐 Authentication: ${authEnabled ? 'ENABLED (API_KEY required)' : 'DISABLED (no API_KEY configured)'}`
     );
-    console.error('📊 Features: Session management, SSE notifications, stateful client connections');
+    console.error(
+      '📊 Features: Session management, SSE notifications, stateful client connections'
+    );
   });
 }
 
 // Graceful shutdown handling
 process.on('SIGINT', async () => {
   console.error('🛑 Shutting down database MCP server...');
-  
+
   // Clean up all database connections
   for (const [sessionId, session] of sessions) {
     try {
@@ -439,7 +443,7 @@ process.on('SIGINT', async () => {
       console.error(`❌ Error cleaning up session ${sessionId}:`, error);
     }
   }
-  
+
   sessions.clear();
   process.exit(0);
 });
@@ -451,7 +455,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   console.error('❌ Uncaught Exception:', error);
   process.exit(1);
 });

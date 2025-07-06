@@ -20,42 +20,56 @@ export function registerMongoResources(
     {
       name: 'MongoDB Server Info',
       description: 'Get MongoDB server information',
-      mimeType: 'application/json'
+      mimeType: 'application/json',
     },
     async (uri: URL) => {
       try {
         const sessionId = 'default';
         const session = await getOrCreateSession(sessionId, config, sessions);
-        
+
         if (!session.clients.mongodb) {
           return {
-            contents: [{
-              uri: uri.href,
-              mimeType: 'application/json',
-              text: JSON.stringify({ error: 'MongoDB is disabled in the server configuration' }, null, 2)
-            }]
+            contents: [
+              {
+                uri: uri.href,
+                mimeType: 'application/json',
+                text: JSON.stringify(
+                  { error: 'MongoDB is disabled in the server configuration' },
+                  null,
+                  2
+                ),
+              },
+            ],
           };
         }
-        
+
         const admin = session.clients.mongodb.db('admin');
         const info = await admin.admin().serverInfo();
-        
+
         return {
-          contents: [{
-            uri: uri.href,
-            mimeType: 'application/json',
-            text: JSON.stringify({ server_info: info }, null, 2)
-          }]
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: 'application/json',
+              text: JSON.stringify({ server_info: info }, null, 2),
+            },
+          ],
         };
       } catch (error) {
         return {
-          contents: [{
-            uri: uri.href,
-            mimeType: 'application/json',
-            text: JSON.stringify({ 
-              error: `Failed to get MongoDB server info: ${error instanceof Error ? error.message : 'Unknown error'}` 
-            }, null, 2)
-          }]
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: 'application/json',
+              text: JSON.stringify(
+                {
+                  error: `Failed to get MongoDB server info: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                },
+                null,
+                2
+              ),
+            },
+          ],
         };
       }
     }
@@ -68,42 +82,56 @@ export function registerMongoResources(
     {
       name: 'MongoDB Databases',
       description: 'List all MongoDB databases',
-      mimeType: 'application/json'
+      mimeType: 'application/json',
     },
     async (uri: URL) => {
       try {
         const sessionId = 'default';
         const session = await getOrCreateSession(sessionId, config, sessions);
-        
+
         if (!session.clients.mongodb) {
           return {
-            contents: [{
-              uri: uri.href,
-              mimeType: 'application/json',
-              text: JSON.stringify({ error: 'MongoDB is disabled in the server configuration' }, null, 2)
-            }]
+            contents: [
+              {
+                uri: uri.href,
+                mimeType: 'application/json',
+                text: JSON.stringify(
+                  { error: 'MongoDB is disabled in the server configuration' },
+                  null,
+                  2
+                ),
+              },
+            ],
           };
         }
-        
+
         const admin = session.clients.mongodb.db('admin');
         const databases = await admin.admin().listDatabases();
-        
+
         return {
-          contents: [{
-            uri: uri.href,
-            mimeType: 'application/json',
-            text: JSON.stringify({ databases: databases.databases }, null, 2)
-          }]
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: 'application/json',
+              text: JSON.stringify({ databases: databases.databases }, null, 2),
+            },
+          ],
         };
       } catch (error) {
         return {
-          contents: [{
-            uri: uri.href,
-            mimeType: 'application/json',
-            text: JSON.stringify({ 
-              error: `Failed to list MongoDB databases: ${error instanceof Error ? error.message : 'Unknown error'}` 
-            }, null, 2)
-          }]
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: 'application/json',
+              text: JSON.stringify(
+                {
+                  error: `Failed to list MongoDB databases: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                },
+                null,
+                2
+              ),
+            },
+          ],
         };
       }
     }
