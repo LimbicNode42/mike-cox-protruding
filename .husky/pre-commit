@@ -1,0 +1,8 @@
+# Run lint-staged for code quality checks
+npx lint-staged
+
+# Run security audit
+npm run security:check
+
+# Run tests
+npm test
